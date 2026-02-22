@@ -188,10 +188,16 @@ def main():
         print("  list [status] [agent]         List jobs")
         print("  show <id>                     Show job details")
         print("  agent <name>                  Show agent's work queue view")
+        print("  work <agent> [id] [--complete] Agent takes & works on job")
+        print("  dispatch                      Mac auto-routes completed jobs")
         print("  pending <agent>               Show pending jobs for agent")
         print("  dashboard                     Launch web dashboard")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
+        print("\nAgent Worker:")
+        print("  jobs work <agent>                   - Agent takes next job")
+        print("  jobs work <agent> <id> --complete   - Complete specific job")
+        print("  jobs dispatch                       - Mac routes completed work")
         print("\nWorkflow commands:")
         print("  jobs workflow dashboard                    - Show CLI dashboard")
         print("  jobs workflow dispatch <id> <agent>        - Dispatch to agent")
@@ -248,52 +254,77 @@ def main():
         show_job(int(sys.argv[2]))
     
     elif cmd == "agent":
-        # Show jobs from a specific agent's perspective
-        if len(sys.argv) < 3:
-            print("Usage: jobs agent <agent_name>")
-            print("\nShows the work queue from an agent's perspective:")
-            print("  - Pending jobs assigned to them")
-            print("  - Recently completed jobs")
-            print("  - Stats about their workload")
-            print("\nAgents: Mac, Glitch, Research, Planning")
-            sys.exit(1)
-        
-        agent_name = sys.argv[2]
-        db = load_db()
-        
-        # Find all jobs for this agent
-        agent_jobs = [j for j in db["jobs"] if j["assigned_to"].lower() == agent_name.lower()]
-        
-        if not agent_jobs:
-            print(f"\n📭 No jobs found for {agent_name}")
-            sys.exit(0)
-        
-        pending = [j for j in agent_jobs if j["status"] != "DONE"]
-        completed = [j for j in agent_jobs if j["status"] == "DONE"]
-        
-        print(f"\n{'='*60}")
-        print(f"👤 {agent_name.upper()} AGENT VIEW")
-        print(f"{'='*60}")
-        
-        print(f"\n📊 STATS")
-        print(f"   Pending: {len(pending)}")
-        print(f"   Completed: {len(completed)}")
-        print(f"   Total: {len(agent_jobs)}")
-        
-        if pending:
-            print(f"\n🔄 PENDING JOBS ({len(pending)})")
-            for job in sorted(pending, key=lambda x: x["id"]):
-                parent_info = f" (sub of #{job['parent_id']})" if job["parent_id"] else ""
-                print(f"   #{job['id']}: {job['description'][:50]}{parent_info}")
-        
-        if completed:
-            print(f"\n✅ COMPLETED JOBS ({len(completed)})")
-            for job in sorted(completed, key=lambda x: x["id"], reverse=True)[:5]:
-                print(f"   #{job['id']}: {job['description'][:50]}")
-            if len(completed) > 5:
-                print(f"   ... and {len(completed) - 5} more")
-        
-        print()
+        # Check if it's a subcommand for agent_worker
+        if len(sys.argv) >= 3 and sys.argv[2] in ["status", "work", "process"]:
+            from agent_worker import main as worker_main
+            sys.argv = ["agent_worker"] + sys.argv[2:]
+            worker_main()
+        else:
+            # Show agent's work queue view
+            if len(sys.argv) < 3:
+                print("Usage: jobs agent <name>")
+                print("\nShows the work queue from an agent's perspective:")
+                print("  - Pending jobs assigned to them")
+                print("  - Recently completed jobs")
+                print("  - Stats about their workload")
+                print("\nAgents: Mac, Glitch, Research, Planning")
+                print("\nAgent subcommands:")
+                print("  jobs agent status <name>      - Detailed agent status")
+                print("  jobs agent work <name>        - Agent takes next job")
+                print("  jobs agent process <name>     - Process all pending jobs")
+                sys.exit(1)
+            
+            agent_name = sys.argv[2]
+            db = load_db()
+            
+            # Find all jobs for this agent
+            agent_jobs = [j for j in db["jobs"] if j["assigned_to"].lower() == agent_name.lower()]
+            
+            if not agent_jobs:
+                print(f"\n📭 No jobs found for {agent_name}")
+                sys.exit(0)
+            
+            pending = [j for j in agent_jobs if j["status"] != "DONE"]
+            completed = [j for j in agent_jobs if j["status"] == "DONE"]
+            
+            print(f"\n{'='*60}")
+            print(f"👤 {agent_name.upper()} AGENT VIEW")
+            print(f"{'='*60}")
+            
+            print(f"\n📊 STATS")
+            print(f"   Pending: {len(pending)}")
+            print(f"   Completed: {len(completed)}")
+            print(f"   Total: {len(agent_jobs)}")
+            
+            if pending:
+                print(f"\n🔄 PENDING JOBS ({len(pending)})")
+                for job in sorted(pending, key=lambda x: x["id"]):
+                    parent_info = f" (sub of #{job['parent_id']})" if job["parent_id"] else ""
+                    print(f"   #{job['id']}: {job['description'][:50]}{parent_info}")
+            
+            if completed:
+                print(f"\n✅ COMPLETED JOBS ({len(completed)})")
+                for job in sorted(completed, key=lambda x: x["id"], reverse=True)[:5]:
+                    print(f"   #{job['id']}: {job['description'][:50]}")
+                if len(completed) > 5:
+                    print(f"   ... and {len(completed) - 5} more")
+            
+            print()
+    
+    elif cmd == "work":
+        # Delegate to agent worker
+        # sys.argv = ['jobs', 'work', 'Planning', '--complete']
+        # Need to pass: ['agent_worker', 'work', 'Planning', '--complete']
+        from agent_worker import main as worker_main
+        original_argv = sys.argv.copy()
+        sys.argv = ["agent_worker"] + original_argv[1:]
+        worker_main()
+    
+    elif cmd == "dispatch":
+        # Mac auto-dispatches completed jobs
+        from agent_worker import main as worker_main
+        sys.argv = ["agent_worker", "dispatch"]
+        worker_main()
     
     elif cmd == "pending":
         if len(sys.argv) < 3:

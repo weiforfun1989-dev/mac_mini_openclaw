@@ -8,35 +8,123 @@
       "status": "IN_PROGRESS",
       "assigned_to": "Research",
       "created_at": "2026-02-22T10:44:00.902371",
-      "completed_at": "2026-02-22T10:45:00.332714",
+      "completed_at": "2026-02-22T14:10:35.247871",
       "sub_jobs": [
         2,
-        3
+        3,
+        4,
+        5,
+        7,
+        9
       ],
-      "notes": "Found 5 relevant articles on topic"
+      "notes": "Completed technical feasibility analysis",
+      "claimed_at": "2026-02-22T14:10:34.671721",
+      "claimed_by": "Research"
     },
     {
       "id": 2,
       "parent_id": 1,
       "description": "\u2705 Research complete for #1: Found 5 relevant articles on topic",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T10:45:00.332835",
       "completed_at": null,
       "sub_jobs": [],
-      "notes": ""
+      "notes": "Auto-evaluated and routed"
     },
     {
       "id": 3,
       "parent_id": 1,
       "description": "Planning task for: Test workflow system",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T10:45:09.637595",
+      "completed_at": "2026-02-22T14:08:12.570047",
+      "sub_jobs": [],
+      "notes": "Created detailed roadmap with 4 milestones",
+      "claimed_at": "2026-02-22T14:08:11.994020",
+      "claimed_by": "Planning"
+    },
+    {
+      "id": 4,
+      "parent_id": 1,
+      "description": "\u2705 Planning complete for #1: Created detailed roadmap with 4 milestones",
+      "status": "DONE",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:08:12.570983",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "Auto-evaluated and routed"
+    },
+    {
+      "id": 5,
+      "parent_id": 1,
+      "description": "Glitch task for: Test workflow system",
+      "status": "TODO",
+      "assigned_to": "Glitch",
+      "created_at": "2026-02-22T14:10:14.342612",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": ""
+    },
+    {
+      "id": 6,
+      "parent_id": null,
+      "description": "Build a new feature",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Research",
+      "created_at": "2026-02-22T14:10:26.828913",
+      "completed_at": "2026-02-22T14:10:46.362866",
+      "sub_jobs": [
+        8,
+        10
+      ],
+      "notes": "Research on new feature complete"
+    },
+    {
+      "id": 7,
+      "parent_id": 1,
+      "description": "\u2705 Research complete for #1: Completed technical feasibility analysis",
+      "status": "DONE",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:10:35.249106",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "Auto-evaluated and routed"
+    },
+    {
+      "id": 8,
+      "parent_id": 6,
+      "description": "\u2705 Research complete for #6: Research on new feature complete",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:10:46.363533",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": ""
+    },
+    {
+      "id": 9,
+      "parent_id": 1,
+      "description": "Planning task for: Test workflow system",
+      "status": "TODO",
+      "assigned_to": "Planning",
+      "created_at": "2026-02-22T14:10:50.440566",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": ""
+    },
+    {
+      "id": 10,
+      "parent_id": 6,
+      "description": "Planning task for: Build a new feature",
+      "status": "TODO",
+      "assigned_to": "Planning",
+      "created_at": "2026-02-22T14:10:50.441045",
       "completed_at": null,
       "sub_jobs": [],
       "notes": ""
     }
   ],
-  "lastJobId": 3
+  "lastJobId": 10
 }
