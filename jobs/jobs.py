@@ -187,6 +187,7 @@ def main():
         print("  complete <id> [notes]         Mark job as complete")
         print("  list [status] [agent]         List jobs")
         print("  show <id>                     Show job details")
+        print("  agent <name>                  Show agent's work queue view")
         print("  pending <agent>               Show pending jobs for agent")
         print("  dashboard                     Launch web dashboard")
         print("  workflow <cmd> [args]         Workflow automation commands")
@@ -245,6 +246,54 @@ def main():
             print("Usage: jobs show <id>")
             sys.exit(1)
         show_job(int(sys.argv[2]))
+    
+    elif cmd == "agent":
+        # Show jobs from a specific agent's perspective
+        if len(sys.argv) < 3:
+            print("Usage: jobs agent <agent_name>")
+            print("\nShows the work queue from an agent's perspective:")
+            print("  - Pending jobs assigned to them")
+            print("  - Recently completed jobs")
+            print("  - Stats about their workload")
+            print("\nAgents: Mac, Glitch, Research, Planning")
+            sys.exit(1)
+        
+        agent_name = sys.argv[2]
+        db = load_db()
+        
+        # Find all jobs for this agent
+        agent_jobs = [j for j in db["jobs"] if j["assigned_to"].lower() == agent_name.lower()]
+        
+        if not agent_jobs:
+            print(f"\n📭 No jobs found for {agent_name}")
+            sys.exit(0)
+        
+        pending = [j for j in agent_jobs if j["status"] != "DONE"]
+        completed = [j for j in agent_jobs if j["status"] == "DONE"]
+        
+        print(f"\n{'='*60}")
+        print(f"👤 {agent_name.upper()} AGENT VIEW")
+        print(f"{'='*60}")
+        
+        print(f"\n📊 STATS")
+        print(f"   Pending: {len(pending)}")
+        print(f"   Completed: {len(completed)}")
+        print(f"   Total: {len(agent_jobs)}")
+        
+        if pending:
+            print(f"\n🔄 PENDING JOBS ({len(pending)})")
+            for job in sorted(pending, key=lambda x: x["id"]):
+                parent_info = f" (sub of #{job['parent_id']})" if job["parent_id"] else ""
+                print(f"   #{job['id']}: {job['description'][:50]}{parent_info}")
+        
+        if completed:
+            print(f"\n✅ COMPLETED JOBS ({len(completed)})")
+            for job in sorted(completed, key=lambda x: x["id"], reverse=True)[:5]:
+                print(f"   #{job['id']}: {job['description'][:50]}")
+            if len(completed) > 5:
+                print(f"   ... and {len(completed) - 5} more")
+        
+        print()
     
     elif cmd == "pending":
         if len(sys.argv) < 3:

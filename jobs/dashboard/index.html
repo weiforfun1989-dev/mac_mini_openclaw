@@ -159,6 +159,84 @@
             font-size: 0.85em;
             margin-top: 30px;
         }
+        .agent-filter {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .agent-btn {
+            padding: 8px 16px;
+            border: 1px solid #444;
+            background: #1a1a2e;
+            color: #888;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+        .agent-btn:hover {
+            border-color: #00d4ff;
+            color: #fff;
+        }
+        .agent-btn.active {
+            background: #00d4ff;
+            color: #0f0f23;
+            border-color: #00d4ff;
+            font-weight: 600;
+        }
+        .agent-view {
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #2a2a4a;
+        }
+        .agent-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .agent-view-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .agent-view-stats {
+            display: flex;
+            gap: 20px;
+        }
+        .agent-view-stat {
+            text-align: center;
+        }
+        .agent-view-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        .agent-view-stat-label {
+            font-size: 0.75em;
+            color: #888;
+        }
+        .queue-section {
+            margin-top: 20px;
+        }
+        .queue-title {
+            font-size: 0.85em;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -187,6 +265,42 @@
                 <div class="stat-value" id="completed-jobs">0</div>
                 <div class="stat-label">Completed</div>
             </div>
+        </div>
+    </div>
+
+    <div class="agent-filter">
+        <button class="agent-btn active" onclick="filterByAgent('all')">All Jobs</button>
+        <button class="agent-btn" onclick="filterByAgent('Mac')">Mac</button>
+        <button class="agent-btn" onclick="filterByAgent('Glitch')">Glitch</button>
+        <button class="agent-btn" onclick="filterByAgent('Research')">Research</button>
+        <button class="agent-btn" onclick="filterByAgent('Planning')">Planning</button>
+    </div>
+
+    <div class="agent-view" id="agent-view" style="display: none;">
+        <div class="agent-view-header">
+            <div class="agent-view-title" id="agent-view-title">👤 Agent View</div>
+            <div class="agent-view-stats">
+                <div class="agent-view-stat">
+                    <div class="agent-view-stat-value" id="agent-pending">0</div>
+                    <div class="agent-view-stat-label">Pending</div>
+                </div>
+                <div class="agent-view-stat">
+                    <div class="agent-view-stat-value" id="agent-completed">0</div>
+                    <div class="agent-view-stat-label">Completed</div>
+                </div>
+                <div class="agent-view-stat">
+                    <div class="agent-view-stat-value" id="agent-total">0</div>
+                    <div class="agent-view-stat-label">Total</div>
+                </div>
+            </div>
+        </div>
+        <div class="queue-section" id="agent-pending-queue">
+            <div class="queue-title">🔄 Pending Jobs</div>
+            <div id="agent-pending-list"></div>
+        </div>
+        <div class="queue-section" id="agent-completed-queue" style="margin-top: 20px;">
+            <div class="queue-title">✅ Completed Jobs</div>
+            <div id="agent-completed-list"></div>
         </div>
     </div>
 
@@ -287,31 +401,112 @@
             `;
         }
 
+        let allJobsData = [];
+        let currentAgentFilter = 'all';
+
+        function filterByAgent(agent) {
+            currentAgentFilter = agent;
+            
+            // Update button states
+            document.querySelectorAll('.agent-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide agent view vs all jobs view
+            const agentView = document.getElementById('agent-view');
+            const jobsContainer = document.getElementById('jobs-container');
+            
+            if (agent === 'all') {
+                agentView.style.display = 'none';
+                jobsContainer.style.display = 'block';
+                renderAllJobs();
+            } else {
+                agentView.style.display = 'block';
+                jobsContainer.style.display = 'none';
+                renderAgentView(agent);
+            }
+        }
+
+        function renderAgentView(agentName) {
+            const agentJobs = allJobsData.filter(j => 
+                j.assigned_to.toLowerCase() === agentName.toLowerCase()
+            );
+            
+            const pending = agentJobs.filter(j => j.status !== 'DONE');
+            const completed = agentJobs.filter(j => j.status === 'DONE');
+            
+            document.getElementById('agent-view-title').textContent = `👤 ${agentName} Agent View`;
+            document.getElementById('agent-pending').textContent = pending.length;
+            document.getElementById('agent-completed').textContent = completed.length;
+            document.getElementById('agent-total').textContent = agentJobs.length;
+            
+            // Render pending jobs
+            const pendingList = document.getElementById('agent-pending-list');
+            if (pending.length === 0) {
+                pendingList.innerHTML = '<div class="queue-item"><span>No pending jobs 🎉</span></div>';
+            } else {
+                pendingList.innerHTML = pending.sort((a, b) => b.id - a.id).map(job => `
+                    <div class="queue-item">
+                        <span>${getStatusIcon(job.status)}</span>
+                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
+                        <span style="flex: 1;">${job.description}</span>
+                        ${job.parent_id ? `<span style="font-size: 0.75em; color: #666;">sub of #${job.parent_id}</span>` : ''}
+                    </div>
+                `).join('');
+            }
+            
+            // Render completed jobs
+            const completedList = document.getElementById('agent-completed-list');
+            if (completed.length === 0) {
+                completedList.innerHTML = '<div class="queue-item"><span>No completed jobs yet</span></div>';
+            } else {
+                completedList.innerHTML = completed.sort((a, b) => b.id - a.id).slice(0, 10).map(job => `
+                    <div class="queue-item">
+                        <span>✅</span>
+                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
+                        <span style="flex: 1; color: #888;">${job.description}</span>
+                    </div>
+                `).join('');
+                if (completed.length > 10) {
+                    completedList.innerHTML += `<div class="queue-item" style="justify-content: center; color: #666;">... and ${completed.length - 10} more</div>`;
+                }
+            }
+        }
+
+        function renderAllJobs() {
+            const container = document.getElementById('jobs-container');
+            const mainJobs = allJobsData.filter(j => j.parent_id === null);
+            
+            if (mainJobs.length === 0) {
+                container.innerHTML = renderEmptyState();
+            } else {
+                container.innerHTML = mainJobs
+                    .sort((a, b) => b.id - a.id)
+                    .map(job => renderJobCard(job, allJobsData))
+                    .join('');
+            }
+        }
+
         async function loadJobs() {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 
-                const container = document.getElementById('jobs-container');
-                const allJobs = data.jobs || [];
+                allJobsData = data.jobs || [];
                 
                 // Update stats
-                document.getElementById('total-jobs').textContent = allJobs.length;
+                document.getElementById('total-jobs').textContent = allJobsData.length;
                 document.getElementById('active-jobs').textContent = 
-                    allJobs.filter(j => j.status === 'IN_PROGRESS').length;
+                    allJobsData.filter(j => j.status === 'IN_PROGRESS').length;
                 document.getElementById('completed-jobs').textContent = 
-                    allJobs.filter(j => j.status === 'DONE').length;
+                    allJobsData.filter(j => j.status === 'DONE').length;
                 
-                // Get main jobs (no parent)
-                const mainJobs = allJobs.filter(j => j.parent_id === null);
-                
-                if (mainJobs.length === 0) {
-                    container.innerHTML = renderEmptyState();
+                // Render based on current view
+                if (currentAgentFilter === 'all') {
+                    renderAllJobs();
                 } else {
-                    container.innerHTML = mainJobs
-                        .sort((a, b) => b.id - a.id)
-                        .map(job => renderJobCard(job, allJobs))
-                        .join('');
+                    renderAgentView(currentAgentFilter);
                 }
                 
                 document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
