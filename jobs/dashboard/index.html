@@ -237,6 +237,98 @@
             border-radius: 6px;
             margin-bottom: 8px;
         }
+        .agents-overview {
+            margin-bottom: 30px;
+        }
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .agent-card {
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2a4a;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .agent-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+        .agent-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .agent-card-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .agent-card-badge {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .agent-card-badge.mac { background: #7b2cbf; color: #fff; }
+        .agent-card-badge.glitch { background: #f0a500; color: #1a1a2e; }
+        .agent-card-badge.research { background: #00d4ff; color: #0f0f23; }
+        .agent-card-badge.planning { background: #00ff88; color: #0f0f23; }
+        .agent-card-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .agent-card-stat {
+            text-align: center;
+            flex: 1;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .agent-card-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .agent-card-stat-value.pending { color: #f0a500; }
+        .agent-card-stat-value.done { color: #00d4ff; }
+        .agent-card-stat-label {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+        }
+        .agent-card-queue {
+            margin-top: 15px;
+        }
+        .agent-card-queue-title {
+            font-size: 0.8em;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .agent-card-queue-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+        .agent-card-empty {
+            color: #666;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+        }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -269,11 +361,14 @@
     </div>
 
     <div class="agent-filter">
-        <button class="agent-btn active" onclick="filterByAgent('all')">All Jobs</button>
-        <button class="agent-btn" onclick="filterByAgent('Mac')">Mac</button>
-        <button class="agent-btn" onclick="filterByAgent('Glitch')">Glitch</button>
-        <button class="agent-btn" onclick="filterByAgent('Research')">Research</button>
-        <button class="agent-btn" onclick="filterByAgent('Planning')">Planning</button>
+        <button class="agent-btn active" onclick="switchView('all')">All Jobs</button>
+        <button class="agent-btn" onclick="switchView('agents')">Agent Queues</button>
+    </div>
+
+    <div class="agents-overview" id="agents-overview" style="display: none;">
+        <div class="agents-grid" id="agents-grid">
+            <!-- Agent cards will be loaded here -->
+        </div>
     </div>
 
     <div class="agent-view" id="agent-view" style="display: none;">
@@ -402,30 +497,85 @@
         }
 
         let allJobsData = [];
-        let currentAgentFilter = 'all';
+        let currentView = 'all';
 
-        function filterByAgent(agent) {
-            currentAgentFilter = agent;
+        const AGENTS = ['Mac', 'Glitch', 'Research', 'Planning'];
+
+        function switchView(view) {
+            currentView = view;
             
             // Update button states
-            document.querySelectorAll('.agent-btn').forEach(btn => {
-                btn.classList.remove('active');
+            document.querySelectorAll('.agent-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', 
+                    (view === 'all' && index === 0) || 
+                    (view === 'agents' && index === 1));
             });
-            event.target.classList.add('active');
             
-            // Show/hide agent view vs all jobs view
-            const agentView = document.getElementById('agent-view');
-            const jobsContainer = document.getElementById('jobs-container');
+            // Show/hide views
+            document.getElementById('agents-overview').style.display = view === 'agents' ? 'block' : 'none';
+            document.getElementById('agent-view').style.display = 'none';
+            document.getElementById('jobs-container').style.display = view === 'all' ? 'block' : 'none';
             
-            if (agent === 'all') {
-                agentView.style.display = 'none';
-                jobsContainer.style.display = 'block';
+            if (view === 'all') {
                 renderAllJobs();
-            } else {
-                agentView.style.display = 'block';
-                jobsContainer.style.display = 'none';
-                renderAgentView(agent);
+            } else if (view === 'agents') {
+                renderAgentsOverview();
             }
+        }
+
+        function renderAgentsOverview() {
+            const grid = document.getElementById('agents-grid');
+            
+            const agentCards = AGENTS.map(agent => {
+                const agentJobs = allJobsData.filter(j => 
+                    j.assigned_to.toLowerCase() === agent.toLowerCase()
+                );
+                
+                const pending = agentJobs.filter(j => j.status !== 'DONE');
+                const completed = agentJobs.filter(j => j.status === 'DONE');
+                
+                const badgeClass = agent.toLowerCase();
+                const pendingQueue = pending.slice(0, 5).map(job => `
+                    <div class="agent-card-queue-item">
+                        <span>${getStatusIcon(job.status)}</span>
+                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
+                    </div>
+                `).join('');
+                
+                return `
+                    <div class="agent-card">
+                        <div class="agent-card-header">
+                            <div class="agent-card-name">
+                                👤 ${agent}
+                            </div>
+                            <span class="agent-card-badge ${badgeClass}">${agent}</span>
+                        </div>
+                        <div class="agent-card-stats">
+                            <div class="agent-card-stat">
+                                <div class="agent-card-stat-value pending">${pending.length}</div>
+                                <div class="agent-card-stat-label">Pending</div>
+                            </div>
+                            <div class="agent-card-stat">
+                                <div class="agent-card-stat-value done">${completed.length}</div>
+                                <div class="agent-card-stat-label">Done</div>
+                            </div>
+                            <div class="agent-card-stat">
+                                <div class="agent-card-stat-value">${agentJobs.length}</div>
+                                <div class="agent-card-stat-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="agent-card-queue">
+                            <div class="agent-card-queue-title">🔄 Work Queue (${pending.length})</div>
+                            ${pending.length === 0 ? 
+                                '<div class="agent-card-empty">No pending jobs 🎉</div>' : 
+                                pendingQueue + (pending.length > 5 ? `<div class="agent-card-empty">... and ${pending.length - 5} more</div>` : '')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            grid.innerHTML = agentCards;
         }
 
         function renderAgentView(agentName) {
@@ -503,10 +653,10 @@
                     allJobsData.filter(j => j.status === 'DONE').length;
                 
                 // Render based on current view
-                if (currentAgentFilter === 'all') {
+                if (currentView === 'all') {
                     renderAllJobs();
-                } else {
-                    renderAgentView(currentAgentFilter);
+                } else if (currentView === 'agents') {
+                    renderAgentsOverview();
                 }
                 
                 document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
