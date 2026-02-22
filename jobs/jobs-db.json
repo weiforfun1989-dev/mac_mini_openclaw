@@ -15,7 +15,8 @@
         4,
         5,
         7,
-        9
+        9,
+        11
       ],
       "notes": "Completed technical feasibility analysis",
       "claimed_at": "2026-02-22T14:10:34.671721",
@@ -107,12 +108,14 @@
       "id": 9,
       "parent_id": 1,
       "description": "Planning task for: Test workflow system",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T14:10:50.440566",
-      "completed_at": null,
+      "completed_at": "2026-02-22T14:15:08.183659",
       "sub_jobs": [],
-      "notes": ""
+      "notes": "Based on research findings: Defined project scope and resource requirements",
+      "claimed_at": "2026-02-22T14:15:07.532345",
+      "claimed_by": "Planning"
     },
     {
       "id": 10,
@@ -124,7 +127,18 @@
       "completed_at": null,
       "sub_jobs": [],
       "notes": ""
+    },
+    {
+      "id": 11,
+      "parent_id": 1,
+      "description": "\u2705 Planning complete for #1: Based on research findings: Defined project scope and resource requirements",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:15:08.185251",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": ""
     }
   ],
-  "lastJobId": 10
+  "lastJobId": 11
 }

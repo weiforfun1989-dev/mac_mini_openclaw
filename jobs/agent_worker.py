@@ -87,6 +87,7 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     """
     Simulate an agent taking a job from their queue.
     If job_id is None, takes the oldest pending job.
+    Includes context from previous agent work on the same main task.
     """
     db = load_db()
     pending = get_agent_pending_jobs(agent_name, db)
@@ -109,18 +110,67 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     # Claim the job
     claim_job(job_id, agent_name)
     
+    # Gather context from previous agent work on the same main task
+    context = []
+    if job.get("parent_id"):
+        parent_id = job["parent_id"]
+        # Find all completed sibling sub-jobs
+        sibling_jobs = [j for j in db["jobs"] 
+                       if j.get("parent_id") == parent_id 
+                       and j["id"] != job_id
+                       and j["status"] == "DONE"]
+        
+        # Look for Research completions (useful for Planning)
+        agent_lower = agent_name.lower()
+        if agent_lower == "planning":
+            research_completions = [j for j in sibling_jobs 
+                                   if "research complete" in j["description"].lower()]
+            if research_completions:
+                context.append("📚 Previous Research Results:")
+                for rj in research_completions:
+                    # Extract the summary part after the colon
+                    desc = rj["description"]
+                    if ":" in desc:
+                        summary = desc.split(":", 1)[1].strip()
+                        context.append(f"   • {summary[:80]}")
+        
+        # Look for Planning completions (useful for Glitch)
+        elif agent_lower == "glitch":
+            planning_completions = [j for j in sibling_jobs 
+                                   if "planning complete" in j["description"].lower()]
+            if planning_completions:
+                context.append("📋 Previous Planning Results:")
+                for pj in planning_completions:
+                    desc = pj["description"]
+                    if ":" in desc:
+                        summary = desc.split(":", 1)[1].strip()
+                        context.append(f"   • {summary[:80]}")
+    
+    if context:
+        print("   📖 Context from previous work:")
+        for line in context:
+            print(f"   {line}")
+    
     print(f"   ⏳ Processing...")
     
     if auto_complete:
         # Simulate work time
         time.sleep(0.5)
         
-        # Generate completion response
+        # Generate completion response with context awareness
         agent_key = agent_name.lower()
         if agent_key in AGENT_RESPONSES:
-            response = random.choice(AGENT_RESPONSES[agent_key])
+            base_response = random.choice(AGENT_RESPONSES[agent_key])
         else:
-            response = "Task completed successfully"
+            base_response = "Task completed successfully"
+        
+        # Add context reference to the response if available
+        if context and agent_key == "planning":
+            response = f"Based on research findings: {base_response}"
+        elif context and agent_key == "glitch":
+            response = f"Following the plan: {base_response}"
+        else:
+            response = base_response
         
         # Complete the job and create sub-job to Mac
         from workflow import agent_complete_and_notify
