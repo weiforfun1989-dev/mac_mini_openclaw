@@ -376,12 +376,16 @@
             <div class="agent-view-title" id="agent-view-title">👤 Agent View</div>
             <div class="agent-view-stats">
                 <div class="agent-view-stat">
+                    <div class="agent-view-stat-value" style="color: #f0a500;" id="agent-inprogress">0</div>
+                    <div class="agent-view-stat-label">In Progress</div>
+                </div>
+                <div class="agent-view-stat">
                     <div class="agent-view-stat-value" id="agent-pending">0</div>
                     <div class="agent-view-stat-label">Pending</div>
                 </div>
                 <div class="agent-view-stat">
-                    <div class="agent-view-stat-value" id="agent-completed">0</div>
-                    <div class="agent-view-stat-label">Completed</div>
+                    <div class="agent-view-stat-value" style="color: #00d4ff;" id="agent-completed">0</div>
+                    <div class="agent-view-stat-label">Done</div>
                 </div>
                 <div class="agent-view-stat">
                     <div class="agent-view-stat-value" id="agent-total">0</div>
@@ -389,12 +393,16 @@
                 </div>
             </div>
         </div>
-        <div class="queue-section" id="agent-pending-queue">
-            <div class="queue-title">🔄 Pending Jobs</div>
+        <div class="queue-section" id="agent-inprogress-queue">
+            <div class="queue-title">🔨 In Progress</div>
+            <div id="agent-inprogress-list"></div>
+        </div>
+        <div class="queue-section" id="agent-pending-queue" style="margin-top: 20px;">
+            <div class="queue-title">⏳ Pending</div>
             <div id="agent-pending-list"></div>
         </div>
         <div class="queue-section" id="agent-completed-queue" style="margin-top: 20px;">
-            <div class="queue-title">✅ Completed Jobs</div>
+            <div class="queue-title">✅ Completed</div>
             <div id="agent-completed-list"></div>
         </div>
     </div>
@@ -531,10 +539,19 @@
                     j.assigned_to.toLowerCase() === agent.toLowerCase()
                 );
                 
-                const pending = agentJobs.filter(j => j.status !== 'DONE');
+                const pending = agentJobs.filter(j => j.status !== 'DONE' && j.status !== 'IN_PROGRESS');
+                const inProgress = agentJobs.filter(j => j.status === 'IN_PROGRESS');
                 const completed = agentJobs.filter(j => j.status === 'DONE');
                 
                 const badgeClass = agent.toLowerCase();
+                const inProgressQueue = inProgress.slice(0, 3).map(job => `
+                    <div class="agent-card-queue-item" style="border-left: 3px solid #f0a500; padding-left: 8px;">
+                        <span>🔄</span>
+                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
+                    </div>
+                `).join('');
+                
                 const pendingQueue = pending.slice(0, 5).map(job => `
                     <div class="agent-card-queue-item">
                         <span>${getStatusIcon(job.status)}</span>
@@ -553,6 +570,10 @@
                         </div>
                         <div class="agent-card-stats">
                             <div class="agent-card-stat">
+                                <div class="agent-card-stat-value" style="color: #f0a500;">${inProgress.length}</div>
+                                <div class="agent-card-stat-label">In Progress</div>
+                            </div>
+                            <div class="agent-card-stat">
                                 <div class="agent-card-stat-value pending">${pending.length}</div>
                                 <div class="agent-card-stat-label">Pending</div>
                             </div>
@@ -565,8 +586,15 @@
                                 <div class="agent-card-stat-label">Total</div>
                             </div>
                         </div>
+                        ${inProgress.length > 0 ? `
+                        <div class="agent-card-queue" style="margin-bottom: 15px;">
+                            <div class="agent-card-queue-title">🔨 In Progress (${inProgress.length})</div>
+                            ${inProgressQueue}
+                            ${inProgress.length > 3 ? `<div class="agent-card-empty">... and ${inProgress.length - 3} more</div>` : ''}
+                        </div>
+                        ` : ''}
                         <div class="agent-card-queue">
-                            <div class="agent-card-queue-title">🔄 Work Queue (${pending.length})</div>
+                            <div class="agent-card-queue-title">⏳ Pending Queue (${pending.length})</div>
                             ${pending.length === 0 ? 
                                 '<div class="agent-card-empty">No pending jobs 🎉</div>' : 
                                 pendingQueue + (pending.length > 5 ? `<div class="agent-card-empty">... and ${pending.length - 5} more</div>` : '')}
@@ -583,13 +611,30 @@
                 j.assigned_to.toLowerCase() === agentName.toLowerCase()
             );
             
-            const pending = agentJobs.filter(j => j.status !== 'DONE');
+            const pending = agentJobs.filter(j => j.status !== 'DONE' && j.status !== 'IN_PROGRESS');
+            const inProgress = agentJobs.filter(j => j.status === 'IN_PROGRESS');
             const completed = agentJobs.filter(j => j.status === 'DONE');
             
             document.getElementById('agent-view-title').textContent = `👤 ${agentName} Agent View`;
             document.getElementById('agent-pending').textContent = pending.length;
+            document.getElementById('agent-inprogress').textContent = inProgress.length;
             document.getElementById('agent-completed').textContent = completed.length;
             document.getElementById('agent-total').textContent = agentJobs.length;
+            
+            // Render in-progress jobs
+            const inProgressList = document.getElementById('agent-inprogress-list');
+            if (inProgress.length === 0) {
+                inProgressList.innerHTML = '<div class="queue-item"><span>No jobs in progress</span></div>';
+            } else {
+                inProgressList.innerHTML = inProgress.sort((a, b) => b.id - a.id).map(job => `
+                    <div class="queue-item" style="border-left: 3px solid #f0a500;">
+                        <span>🔄</span>
+                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
+                        <span style="flex: 1;">${job.description}</span>
+                        ${job.parent_id ? `<span style="font-size: 0.75em; color: #666;">sub of #${job.parent_id}</span>` : ''}
+                    </div>
+                `).join('');
+            }
             
             // Render pending jobs
             const pendingList = document.getElementById('agent-pending-list');

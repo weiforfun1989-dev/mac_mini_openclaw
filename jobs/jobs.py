@@ -286,21 +286,30 @@ def main():
             
             pending = [j for j in agent_jobs if j["status"] != "DONE"]
             completed = [j for j in agent_jobs if j["status"] == "DONE"]
+            in_progress = [j for j in agent_jobs if j["status"] == "IN_PROGRESS"]
             
             print(f"\n{'='*60}")
             print(f"👤 {agent_name.upper()} AGENT VIEW")
             print(f"{'='*60}")
             
             print(f"\n📊 STATS")
-            print(f"   Pending: {len(pending)}")
-            print(f"   Completed: {len(completed)}")
-            print(f"   Total: {len(agent_jobs)}")
+            print(f"   🔄 In Progress: {len(in_progress)}")
+            print(f"   ⏳ Pending: {len(pending) - len(in_progress)}")
+            print(f"   ✅ Completed: {len(completed)}")
+            print(f"   📊 Total: {len(agent_jobs)}")
             
-            if pending:
-                print(f"\n🔄 PENDING JOBS ({len(pending)})")
-                for job in sorted(pending, key=lambda x: x["id"]):
+            if in_progress:
+                print(f"\n🔨 IN PROGRESS ({len(in_progress)})")
+                for job in in_progress:
                     parent_info = f" (sub of #{job['parent_id']})" if job["parent_id"] else ""
                     print(f"   #{job['id']}: {job['description'][:50]}{parent_info}")
+            
+            if pending and len(pending) > len(in_progress):
+                print(f"\n⏳ PENDING QUEUE ({len(pending) - len(in_progress)})")
+                for job in sorted(pending, key=lambda x: x["id"]):
+                    if job["status"] != "IN_PROGRESS":
+                        parent_info = f" (sub of #{job['parent_id']})" if job["parent_id"] else ""
+                        print(f"   #{job['id']}: {job['description'][:50]}{parent_info}")
             
             if completed:
                 print(f"\n✅ COMPLETED JOBS ({len(completed)})")
