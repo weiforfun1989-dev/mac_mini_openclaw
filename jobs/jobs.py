@@ -188,10 +188,11 @@ def main():
         print("  list [status] [agent]         List jobs")
         print("  show <id>                     Show job details")
         print("  pending <agent>               Show pending jobs for agent")
+        print("  dashboard                     Launch web dashboard")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
         print("\nWorkflow commands:")
-        print("  jobs workflow dashboard                    - Show dashboard")
+        print("  jobs workflow dashboard                    - Show CLI dashboard")
         print("  jobs workflow dispatch <id> <agent>        - Dispatch to agent")
         print("  jobs workflow complete <agent> <id> <msg>  - Agent completes")
         print("  jobs workflow clarify <agent> <id> <msg>   - Agent needs help")
@@ -257,6 +258,17 @@ def main():
                 print(f"  #{job['id']}: {job['description'][:60]}")
         else:
             print(f"No pending jobs for {agent}")
+    
+    elif cmd == "dashboard":
+        # Launch web dashboard
+        import subprocess
+        import os
+        dashboard_path = Path(__file__).parent / "dashboard_server.py"
+        print("🌐 Starting dashboard server...")
+        print("   Opening http://localhost:8765")
+        subprocess.Popen(["python3", str(dashboard_path), "--open"], 
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("   Dashboard launched! Press Ctrl+C in the terminal to stop the server.")
     
     elif cmd == "workflow":
         # Delegate to workflow module
