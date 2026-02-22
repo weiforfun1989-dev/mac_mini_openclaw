@@ -445,6 +445,221 @@ def auto_dispatch_from_mac():
     
     print(f"\n✅ Mac evaluation complete")
 
+def process_parallel_jobs(agent_name, job_ids=None, auto_complete=False):
+    """
+    Process multiple jobs in parallel using threading.
+    Each job runs in its own thread for concurrent execution.
+    """
+    import threading
+    
+    db = load_db()
+    
+    if job_ids:
+        # Process specific jobs
+        jobs = [get_job(db, jid) for jid in job_ids]
+        jobs = [j for j in jobs if j and j["assigned_to"].lower() == agent_name.lower()]
+    else:
+        # Get all pending jobs for the agent (max 5 for parallel processing)
+        jobs = get_agent_pending_jobs(agent_name, db)[:5]
+    
+    if not jobs:
+        print(f"📭 {agent_name} has no pending jobs for parallel processing")
+        return 0
+    
+    print(f"\n🚀 {agent_name} processing {len(jobs)} job(s) in PARALLEL")
+    
+    results = []
+    threads = []
+    
+    def process_job(job):
+        job_id = job["id"]
+        print(f"   [Thread] Starting job #{job_id}")
+        result = simulate_agent_work(agent_name, job_id, auto_complete)
+        results.append((job_id, result))
+        print(f"   [Thread] Finished job #{job_id}")
+    
+    # Start all threads
+    for job in jobs:
+        t = threading.Thread(target=process_job, args=(job,))
+        threads.append(t)
+        t.start()
+    
+    # Wait for all to complete
+    for t in threads:
+        t.join()
+    
+    print(f"\n✅ Parallel processing complete: {len(results)} job(s) processed")
+    return len(results)
+
+def retry_failed_job(job_id, max_retries=None):
+    """
+    Retry a failed/stuck job.
+    Increments retry counter. If max retries exceeded, escalates to Mac.
+    """
+    db = load_db()
+    job = get_job(db, job_id)
+    
+    if not job:
+        print(f"❌ Job #{job_id} not found")
+        return False
+    
+    if job["status"] == "DONE":
+        print(f"✅ Job #{job_id} is already completed")
+        return True
+    
+    # Get or set max retries
+    if max_retries is None:
+        max_retries = job.get("max_retries", 3)
+    
+    current_retries = job.get("retry_count", 0)
+    
+    if current_retries >= max_retries:
+        # Escalate to Mac
+        print(f"\n⛔ Job #{job_id} exceeded max retries ({max_retries})")
+        desc = f"⚠️ MAX RETRIES EXCEEDED: Job #{job_id} failed after {current_retries} attempts"
+        escalation_id = create_job(desc, parent_id=job.get("parent_id"), assigned_to="Mac")
+        
+        job["escalated"] = True
+        job["escalation_id"] = escalation_id
+        job["notes"] = f"Failed after {current_retries} retries"
+        save_db(db)
+        
+        print(f"   Created escalation job #{escalation_id} for Mac")
+        notify_human(f"Job #{job_id} failed after {max_retries} retries and needs manual intervention")
+        return False
+    
+    # Increment retry and reset status
+    job["retry_count"] = current_retries + 1
+    job["status"] = "TODO"  # Reset to pending for re-processing
+    job["health_status"] = "retrying"
+    job["last_heartbeat"] = datetime.now().isoformat()
+    save_db(db)
+    
+    print(f"🔄 Retrying job #{job_id} (attempt {current_retries + 1}/{max_retries})")
+    return True
+
+def check_agent_health(agent_name, timeout_minutes=30):
+    """
+    Health check for an agent.
+    Checks if agent has jobs stuck in progress for too long.
+    Returns list of unhealthy jobs.
+    """
+    db = load_db()
+    
+    # Find jobs in progress without recent heartbeat
+    stuck_jobs = []
+    agent_jobs = [j for j in db["jobs"] 
+                  if j["assigned_to"].lower() == agent_name.lower()
+                  and j["status"] == "IN_PROGRESS"]
+    
+    for job in agent_jobs:
+        # Check if job has been in progress too long
+        started = job.get("started_at")
+        last_heartbeat = job.get("last_heartbeat")
+        
+        if started:
+            started_time = datetime.fromisoformat(started)
+            elapsed = (datetime.now() - started_time).total_seconds() / 60
+            
+            # Check if stuck (no progress for timeout period)
+            if elapsed > timeout_minutes:
+                job["health_status"] = "unresponsive"
+                stuck_jobs.append(job)
+                save_db(db)
+    
+    if stuck_jobs:
+        print(f"\n⚠️  {agent_name} HEALTH CHECK: {len(stuck_jobs)} job(s) stuck")
+        for job in stuck_jobs:
+            print(f"   #{job['id']}: {job['description'][:50]}")
+        
+        # Create health alert for Mac
+        desc = f"🏥 HEALTH ALERT: {agent_name} has {len(stuck_jobs)} unresponsive job(s)"
+        alert_id = create_job(desc, assigned_to="Mac")
+        print(f"   Created health alert #{alert_id}")
+    else:
+        print(f"✅ {agent_name} health check: All jobs healthy")
+    
+    return stuck_jobs
+
+def update_job_heartbeat(job_id):
+    """Update heartbeat timestamp for a job to show it's still active."""
+    db = load_db()
+    job = get_job(db, job_id)
+    
+    if job and job["status"] == "IN_PROGRESS":
+        job["last_heartbeat"] = datetime.now().isoformat()
+        job["health_status"] = "healthy"
+        save_db(db)
+
+def notify_human(message, level="info"):
+    """
+    Send notification to human operator.
+    In a real implementation, this would send to Slack, email, etc.
+    For now, creates a notification job for Mac.
+    """
+    levels = {
+        "info": "ℹ️",
+        "warning": "⚠️",
+        "error": "🚨",
+        "urgent": "🔴"
+    }
+    
+    icon = levels.get(level, "ℹ️")
+    desc = f"{icon} NOTIFICATION: {message}"
+    
+    db = load_db()
+    db["lastJobId"] += 1
+    job_id = db["lastJobId"]
+    
+    job = {
+        "id": job_id,
+        "parent_id": None,
+        "description": desc,
+        "status": "TODO",
+        "assigned_to": "Mac",
+        "created_at": datetime.now().isoformat(),
+        "completed_at": None,
+        "sub_jobs": [],
+        "notes": f"Notification level: {level}",
+        "estimated_minutes": None,
+        "started_at": None,
+        "escalated": False,
+        "retry_count": 0,
+        "max_retries": 3,
+        "last_heartbeat": None,
+        "health_status": "healthy"
+    }
+    
+    db["jobs"].append(job)
+    save_db(db)
+    
+    print(f"\n🔔 NOTIFICATION CREATED: #{job_id}")
+    print(f"   {message}")
+    print(f"   Level: {level}")
+    
+    return job_id
+
+def run_all_health_checks():
+    """Run health checks on all agents."""
+    print("\n" + "="*60)
+    print("🏥 SYSTEM HEALTH CHECK")
+    print("="*60)
+    
+    agents = ["Mac", "Glitch", "Research", "Planning"]
+    total_issues = 0
+    
+    for agent in agents:
+        stuck = check_agent_health(agent)
+        total_issues += len(stuck)
+    
+    if total_issues == 0:
+        print("\n✅ All agents healthy - no issues detected")
+    else:
+        print(f"\n⚠️  Total issues detected: {total_issues}")
+        notify_human(f"Health check found {total_issues} stuck job(s) requiring attention", level="warning")
+    
+    return total_issues
+
 def main():
     if len(sys.argv) < 2:
         print("Agent Worker Commands:")
@@ -452,6 +667,10 @@ def main():
         print("  jobs agent work <name> [id] [--complete]  - Agent takes a job")
         print("  jobs agent process <name> [--auto] - Process all pending jobs")
         print("  jobs agent dispatch               - Mac auto-routes completed jobs")
+        print("  jobs agent parallel <name>         - Process jobs in parallel")
+        print("  jobs agent retry <job_id>          - Retry a failed job")
+        print("  jobs agent health [name]           - Run health check")
+        print("  jobs agent notify <message>        - Send notification")
         print("\nAgents: Mac, Glitch, Research, Planning")
         sys.exit(1)
     
@@ -489,6 +708,36 @@ def main():
     
     elif cmd == "dispatch":
         auto_dispatch_from_mac()
+    
+    elif cmd == "parallel":
+        if len(sys.argv) < 3:
+            print("Usage: jobs agent parallel <agent_name> [--complete]")
+            sys.exit(1)
+        agent = sys.argv[2]
+        auto = "--complete" in sys.argv or "--auto" in sys.argv
+        process_parallel_jobs(agent, auto_complete=auto)
+    
+    elif cmd == "retry":
+        if len(sys.argv) < 3:
+            print("Usage: jobs agent retry <job_id>")
+            sys.exit(1)
+        job_id = int(sys.argv[2])
+        retry_failed_job(job_id)
+    
+    elif cmd == "health":
+        if len(sys.argv) > 2:
+            check_agent_health(sys.argv[2])
+        else:
+            run_all_health_checks()
+    
+    elif cmd == "notify":
+        if len(sys.argv) < 3:
+            print("Usage: jobs agent notify <message> [level]")
+            print("Levels: info, warning, error, urgent")
+            sys.exit(1)
+        message = sys.argv[2]
+        level = sys.argv[3] if len(sys.argv) > 3 else "info"
+        notify_human(message, level)
     
     else:
         print(f"Unknown agent command: {cmd}")

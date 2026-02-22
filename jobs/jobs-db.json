@@ -304,7 +304,7 @@
       "id": 22,
       "parent_id": null,
       "description": "Test escalation v4",
-      "status": "IN_PROGRESS",
+      "status": "TODO",
       "assigned_to": "Glitch",
       "created_at": "2026-02-22T14:44:44.498196",
       "completed_at": null,
@@ -316,7 +316,10 @@
       "escalated": true,
       "claimed_at": "2026-02-22T14:44:49.516058",
       "actual_minutes": 7.6,
-      "escalation_id": 26
+      "escalation_id": 26,
+      "retry_count": 1,
+      "health_status": "retrying",
+      "last_heartbeat": "2026-02-22T14:51:50.663717"
     },
     {
       "id": 23,
@@ -373,7 +376,25 @@
       "estimated_minutes": null,
       "started_at": null,
       "escalated": false
+    },
+    {
+      "id": 27,
+      "parent_id": null,
+      "description": "\u26a0\ufe0f NOTIFICATION: Test notification from workflow system",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:51:45.119910",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "Notification level: warning",
+      "estimated_minutes": null,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy"
     }
   ],
-  "lastJobId": 26
+  "lastJobId": 27
 }

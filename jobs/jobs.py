@@ -42,7 +42,11 @@ def create_job(description, parent_id=None, assigned_to="Mac"):
         "notes": "",
         "estimated_minutes": None,
         "started_at": None,
-        "escalated": False
+        "escalated": False,
+        "retry_count": 0,
+        "max_retries": 3,
+        "last_heartbeat": None,
+        "health_status": "healthy"
     }
     
     db["jobs"].append(job)
@@ -195,6 +199,10 @@ def main():
         print("  dispatch                      Mac auto-routes completed jobs")
         print("  pending <agent>               Show pending jobs for agent")
         print("  dashboard                     Launch web dashboard")
+        print("  health [agent]                Run health check on agent(s)")
+        print("  parallel <agent> [--complete]  Process jobs in parallel")
+        print("  retry <job_id>                Retry a failed/stuck job")
+        print("  notify <message> [level]       Send notification (info/warning/error/urgent)")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
         print("\nAgent Worker:")
@@ -393,6 +401,40 @@ def main():
         except Exception as e:
             print(f"   ❌ Failed to start server: {e}")
             process.terminate()
+    
+    elif cmd == "health":
+        # Run health check on all agents or specific agent
+        from agent_worker import main as worker_main
+        sys.argv = ["agent_worker", "health"] + (sys.argv[2:] if len(sys.argv) > 2 else [])
+        worker_main()
+    
+    elif cmd == "parallel":
+        # Process jobs in parallel
+        if len(sys.argv) < 3:
+            print("Usage: jobs parallel <agent_name> [--complete]")
+            sys.exit(1)
+        from agent_worker import main as worker_main
+        sys.argv = ["agent_worker", "parallel"] + sys.argv[2:]
+        worker_main()
+    
+    elif cmd == "retry":
+        # Retry a failed job
+        if len(sys.argv) < 3:
+            print("Usage: jobs retry <job_id>")
+            sys.exit(1)
+        from agent_worker import main as worker_main
+        sys.argv = ["agent_worker", "retry"] + sys.argv[2:]
+        worker_main()
+    
+    elif cmd == "notify":
+        # Send notification
+        if len(sys.argv) < 3:
+            print("Usage: jobs notify <message> [level]")
+            print("Levels: info, warning, error, urgent")
+            sys.exit(1)
+        from agent_worker import main as worker_main
+        sys.argv = ["agent_worker", "notify"] + sys.argv[2:]
+        worker_main()
     
     elif cmd == "workflow":
         # Delegate to workflow module
