@@ -63,6 +63,9 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
 
 def start_server():
     """Start the dashboard server."""
+    # Allow address reuse to prevent "Address already in use" errors
+    socketserver.TCPServer.allow_reuse_address = True
+    
     with socketserver.TCPServer(("", PORT), DashboardHandler) as httpd:
         print(f"🚀 Dashboard server running at http://localhost:{PORT}")
         print("   Press Ctrl+C to stop")

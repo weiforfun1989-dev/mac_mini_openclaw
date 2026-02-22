@@ -260,15 +260,47 @@ def main():
             print(f"No pending jobs for {agent}")
     
     elif cmd == "dashboard":
+        # Check if already running
+        import urllib.request
+        try:
+            urllib.request.urlopen("http://localhost:8765/", timeout=1)
+            print("🌐 Dashboard already running at http://localhost:8765")
+            print("   Opening browser...")
+            import webbrowser
+            webbrowser.open("http://localhost:8765")
+            return
+        except:
+            pass
+        
         # Launch web dashboard
         import subprocess
-        import os
+        import threading
+        import time
+        import webbrowser
+        
         dashboard_path = Path(__file__).parent / "dashboard_server.py"
         print("🌐 Starting dashboard server...")
-        print("   Opening http://localhost:8765")
-        subprocess.Popen(["python3", str(dashboard_path), "--open"], 
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print("   Dashboard launched! Press Ctrl+C in the terminal to stop the server.")
+        
+        # Start server in background
+        process = subprocess.Popen(
+            ["python3", str(dashboard_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        
+        # Wait for server to start
+        time.sleep(1)
+        
+        # Check if it's running
+        try:
+            urllib.request.urlopen("http://localhost:8765/", timeout=2)
+            print("   ✅ Server running at http://localhost:8765")
+            print("   Opening browser...")
+            webbrowser.open("http://localhost:8765")
+            print("   Dashboard launched!")
+        except Exception as e:
+            print(f"   ❌ Failed to start server: {e}")
+            process.terminate()
     
     elif cmd == "workflow":
         # Delegate to workflow module
