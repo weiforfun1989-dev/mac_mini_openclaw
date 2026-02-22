@@ -101,8 +101,8 @@ def get_agent_pending_jobs(agent_name, db=None):
             if j["assigned_to"].lower() == agent_lower 
             and j["status"] != "DONE"]
 
-def claim_job(job_id, agent_name):
-    """Agent claims a job to work on."""
+def claim_job(job_id, agent_name, estimated_minutes=None):
+    """Agent claims a job to work on with time estimate."""
     db = load_db()
     job = get_job(db, job_id)
     
@@ -118,14 +118,80 @@ def claim_job(job_id, agent_name):
         print(f"⚠️  Job #{job_id} is assigned to {job['assigned_to']}, not {agent_name}")
         return False
     
+    # Only set estimated_minutes if not already set
+    if estimated_minutes is None:
+        # Check if job already has an estimate
+        if job.get("estimated_minutes"):
+            estimated_minutes = job["estimated_minutes"]
+        else:
+            # Default estimates by agent type
+            default_estimates = {
+                "research": 30,
+                "planning": 20,
+                "glitch": 60,
+                "mac": 10
+            }
+            agent_key = agent_name.lower()
+            estimated_minutes = default_estimates.get(agent_key, 30)
+    
     job["status"] = "IN_PROGRESS"
     job["claimed_at"] = datetime.now().isoformat()
     job["claimed_by"] = agent_name
+    # Only set started_at if not already set (don't reset timer on re-claim)
+    if not job.get("started_at"):
+        job["started_at"] = datetime.now().isoformat()
+    job["estimated_minutes"] = estimated_minutes
     save_db(db)
     
     print(f"🔨 {agent_name} claimed job #{job_id}")
     print(f"   Working on: {job['description'][:60]}")
+    print(f"   ⏱️  Estimated time: {estimated_minutes} minutes")
     return True
+
+def check_time_estimate(job_id):
+    """
+    Check if job has exceeded 2x estimate.
+    Returns (ok_to_complete, minutes_elapsed, escalation_created)
+    """
+    db = load_db()
+    job = get_job(db, job_id)
+    
+    if not job or not job.get("started_at"):
+        return True, 0, False
+    
+    estimated = job.get("estimated_minutes")
+    if not estimated:
+        return True, 0, False
+    
+    # Calculate elapsed time
+    started = datetime.fromisoformat(job["started_at"])
+    elapsed = (datetime.now() - started).total_seconds() / 60  # minutes
+    
+    # Check if exceeded 2x estimate
+    if elapsed > (estimated * 2):
+        if not job.get("escalated"):
+            # Create escalation sub-job to Mac
+            desc = f"⚠️ ESCALATION: {job['claimed_by']} exceeded 2x estimate on job #{job_id}"
+            escalation_id = create_job(desc, parent_id=job.get("parent_id"), assigned_to="Mac")
+            
+            # Reload db to get the updated state after create_job
+            db = load_db()
+            job = get_job(db, job_id)
+            
+            job["escalated"] = True
+            job["escalation_id"] = escalation_id
+            job["actual_minutes"] = round(elapsed, 1)
+            save_db(db)
+            
+            print(f"\n⚠️  TIME LIMIT EXCEEDED!")
+            print(f"   Estimated: {estimated} min | Actual: {round(elapsed, 1)} min")
+            print(f"   Created escalation job #{escalation_id} for Mac")
+            return False, elapsed, True
+        else:
+            print(f"\n⚠️  Already escalated (job #{job.get('escalation_id')})")
+            return False, elapsed, False
+    
+    return True, elapsed, False
 
 def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     """
@@ -151,8 +217,9 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
         job = sorted(pending, key=lambda x: x["id"])[0]
         job_id = job["id"]
     
-    # Claim the job
-    claim_job(job_id, agent_name)
+    # Claim the job with time estimate
+    # Pass None to use existing estimate if present, or default based on agent type
+    claim_job(job_id, agent_name, estimated_minutes=None)
     
     # Gather context from previous agent work on the same main task
     context = []
@@ -198,8 +265,23 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     print(f"   ⏳ Processing...")
     
     if auto_complete:
-        # Simulate work time
-        time.sleep(0.5)
+        # Reload job to get the estimate that was set
+        db = load_db()
+        job = get_job(db, job_id)
+        estimate = job.get("estimated_minutes", 30)
+        
+        # Simulate work time (shortened for demo - use smaller time)
+        work_time = min(estimate * 0.1, 2)  # Simulate 10% of estimate time, max 2 seconds
+        time.sleep(work_time)
+        
+        # Check if exceeded time estimate before completing
+        can_complete, elapsed, was_escalated = check_time_estimate(job_id)
+        
+        if not can_complete:
+            print(f"   ⛔ Cannot complete - escalated to Mac")
+            return job_id
+        
+        print(f"   ✅ Completed in {round(elapsed, 1)} min (estimated {estimate} min)")
         
         # Generate completion response
         agent_key = agent_name.lower()
@@ -288,6 +370,13 @@ def show_agent_status(agent_name):
         print(f"\n🔨 IN PROGRESS")
         for job in in_progress:
             print(f"   #{job['id']}: {job['description'][:55]}")
+            if job.get('estimated_minutes'):
+                elapsed = 0
+                if job.get('started_at'):
+                    started = datetime.fromisoformat(job["started_at"])
+                    elapsed = (datetime.now() - started).total_seconds() / 60
+                status = "⏰ OVERDUE" if elapsed > job['estimated_minutes'] * 2 else f"⏱️  {round(elapsed, 1)}/{job['estimated_minutes']} min"
+                print(f"      Time: {status}")
             if job.get('claimed_at'):
                 print(f"      Claimed: {job['claimed_at'][:19]}")
     

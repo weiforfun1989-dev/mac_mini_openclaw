@@ -39,7 +39,10 @@ def create_job(description, parent_id=None, assigned_to="Mac"):
         "created_at": datetime.now().isoformat(),
         "completed_at": None,
         "sub_jobs": [],
-        "notes": ""
+        "notes": "",
+        "estimated_minutes": None,
+        "started_at": None,
+        "escalated": False
     }
     
     db["jobs"].append(job)
