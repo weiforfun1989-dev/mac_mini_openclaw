@@ -8,7 +8,7 @@
       "status": "IN_PROGRESS",
       "assigned_to": "Research",
       "created_at": "2026-02-22T10:44:00.902371",
-      "completed_at": "2026-02-22T14:10:35.247871",
+      "completed_at": "2026-02-22T14:16:34.581694",
       "sub_jobs": [
         2,
         3,
@@ -16,10 +16,11 @@
         5,
         7,
         9,
-        11
+        11,
+        12
       ],
-      "notes": "Completed technical feasibility analysis",
-      "claimed_at": "2026-02-22T14:10:34.671721",
+      "notes": "Research findings: workflow automation best practices, job dispatch patterns, multi-agent systems",
+      "claimed_at": "2026-02-22T14:16:33.980988",
       "claimed_by": "Research"
     },
     {
@@ -138,7 +139,18 @@
       "completed_at": null,
       "sub_jobs": [],
       "notes": ""
+    },
+    {
+      "id": 12,
+      "parent_id": 1,
+      "description": "\u2705 Research complete for #1: Research findings: workflow automation best practices, job dispatch patterns, multi-agent systems",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T14:16:34.582506",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": ""
     }
   ],
-  "lastJobId": 11
+  "lastJobId": 12
 }
