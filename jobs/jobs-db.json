@@ -7,10 +7,10 @@
       "parent_id": null,
       "sub_job_sequence": null,
       "description": "Add workflow visualization graph to dashboard",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-23T01:05:37.713796",
-      "completed_at": "2026-02-23T01:06:18.896206",
+      "completed_at": "2026-02-23T01:07:59.463737",
       "sub_jobs": [
         2,
         3,
@@ -19,7 +19,7 @@
         6,
         7
       ],
-      "notes": "Task completed successfully",
+      "notes": "All sub-jobs completed: Sage research \u2713, Atlas design \u2713, Glitch implementation \u2713, GitHub commit 41d1ac0",
       "estimated_minutes": 10,
       "started_at": "2026-02-23T01:06:17.819773",
       "escalated": false,
@@ -169,7 +169,8 @@
       "needs_confirmation": false,
       "confirmed": false,
       "claimed_at": "2026-02-23T01:07:46.739204",
-      "claimed_by": "Glitch"
+      "claimed_by": "Glitch",
+      "git_commit": "41d1ac0"
     },
     {
       "id": 7,
