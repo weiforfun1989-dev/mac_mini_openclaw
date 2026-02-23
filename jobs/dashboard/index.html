@@ -159,6 +159,43 @@
             font-size: 0.85em;
             margin-top: 30px;
         }
+        .active-agents {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            min-height: 40px;
+        }
+        .active-agent-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid;
+            animation: pulse 2s infinite;
+        }
+        .active-agent-badge.mac { border-color: #7b2cbf; color: #fff; }
+        .active-agent-badge.glitch { border-color: #f0a500; color: #f0a500; }
+        .active-agent-badge.research { border-color: #00d4ff; color: #00d4ff; }
+        .active-agent-badge.planning { border-color: #00ff88; color: #00ff88; }
+        .active-agent-badge .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: blink 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px currentColor; }
+            50% { box-shadow: 0 0 20px currentColor; }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
         .agent-filter {
             display: flex;
             justify-content: center;
@@ -358,6 +395,10 @@
                 <div class="stat-label">Completed</div>
             </div>
         </div>
+    </div>
+
+    <div class="active-agents" id="active-agents">
+        <!-- Active agents will be shown here -->
     </div>
 
     <div class="agent-filter">
@@ -669,6 +710,39 @@
             }
         }
 
+        function renderActiveAgents() {
+            const container = document.getElementById('active-agents');
+            
+            // Find agents with IN_PROGRESS jobs
+            const activeAgents = AGENTS.filter(agent => {
+                const agentJobs = allJobsData.filter(j => 
+                    j.assigned_to.toLowerCase() === agent.toLowerCase() && 
+                    j.status === 'IN_PROGRESS'
+                );
+                return agentJobs.length > 0;
+            });
+            
+            if (activeAgents.length === 0) {
+                container.innerHTML = '<div style="color: #666; padding: 10px;">No agents currently active</div>';
+                return;
+            }
+            
+            container.innerHTML = activeAgents.map(agent => {
+                const agentJobs = allJobsData.filter(j => 
+                    j.assigned_to.toLowerCase() === agent.toLowerCase() && 
+                    j.status === 'IN_PROGRESS'
+                );
+                const badgeClass = agent.toLowerCase();
+                return `
+                    <div class="active-agent-badge ${badgeClass}">
+                        <span class="indicator"></span>
+                        <span>🔨 ${agent}</span>
+                        <span style="font-weight: bold;">${agentJobs.length}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderAllJobs() {
             const container = document.getElementById('jobs-container');
             const mainJobs = allJobsData.filter(j => j.parent_id === null);
@@ -696,6 +770,9 @@
                     allJobsData.filter(j => j.status === 'IN_PROGRESS').length;
                 document.getElementById('completed-jobs').textContent = 
                     allJobsData.filter(j => j.status === 'DONE').length;
+                
+                // Render active agents
+                renderActiveAgents();
                 
                 // Render based on current view
                 if (currentView === 'all') {
