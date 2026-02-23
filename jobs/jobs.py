@@ -290,6 +290,7 @@ def main():
         print("  auto [--daemon]               Auto-trigger agents and check for deadlocks")
         print("  coordinator [--daemon]        Mac aggressively pushes all agents to closure")
         print("  poll [--daemon]               Agents actively query for work when idle")
+        print("  compact [--daemon|--list]     Archive old jobs to optimize database")
         print("  confirm <job_id>              Confirm a job for dispatch (after Mac review)")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
@@ -668,6 +669,16 @@ def main():
             start_agent_pollers()
         else:
             run_single_poll_cycle()
+    
+    elif cmd == "compact":
+        # Mac compaction service - archive old jobs
+        from compact_service import compact_database, list_archives, run_periodic_compact_daemon
+        if len(sys.argv) > 2 and sys.argv[2] == "--daemon":
+            run_periodic_compact_daemon()
+        elif len(sys.argv) > 2 and sys.argv[2] == "--list":
+            list_archives()
+        else:
+            compact_database()
     
     elif cmd == "workflow":
         # Delegate to workflow module
