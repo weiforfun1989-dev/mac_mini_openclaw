@@ -1057,12 +1057,14 @@
                                         duration = formatDuration(mins);
                                     }
                                     
-                                    // Get output result
+                                    // Get output result with file path
                                     let output = '';
                                     if (sub.research_result) {
-                                        output = `<div style="margin-top: 8px; padding: 8px; background: rgba(0,212,255,0.1); border-radius: 4px;"><strong>📚 Research:</strong> ${sub.research_result.summary || 'Completed'}</div>`;
+                                        const researchFile = sub.research_file ? `<a href="file://${sub.research_file}" style="color: #00d4ff;" target="_blank">📄 ${sub.research_file.split('/').pop()}</a>` : '';
+                                        output = `<div style="margin-top: 8px; padding: 8px; background: rgba(0,212,255,0.1); border-radius: 4px;"><strong>📚 Research:</strong> ${sub.research_result.summary || 'Completed'}<br/>${researchFile}</div>`;
                                     } else if (sub.design_doc) {
-                                        output = `<div style="margin-top: 8px; padding: 8px; background: rgba(147,51,234,0.1); border-radius: 4px;"><strong>📋 Design:</strong> ${sub.design_doc.title || 'Completed'}</div>`;
+                                        const designFile = sub.design_file ? `<a href="file://${sub.design_file}" style="color: #9333ea;" target="_blank">📄 ${sub.design_file.split('/').pop()}</a>` : '';
+                                        output = `<div style="margin-top: 8px; padding: 8px; background: rgba(147,51,234,0.1); border-radius: 4px;"><strong>📋 Design:</strong> ${sub.design_doc.title || 'Completed'}<br/>${designFile}</div>`;
                                     } else if (sub.git_commit) {
                                         output = `<div style="margin-top: 8px; padding: 8px; background: rgba(0,255,136,0.1); border-radius: 4px;"><strong>📦 Git Commit:</strong> ${sub.git_commit}</div>`;
                                     } else if (sub.notes) {

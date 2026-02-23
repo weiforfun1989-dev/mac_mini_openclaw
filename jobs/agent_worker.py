@@ -192,10 +192,11 @@ def perform_web_research(job_id, job_description, context=None):
     job = get_job(db, job_id)
     if job:
         job["research_result"] = research_data
-        save_db(db)
         
-        # Also save to file
+        # Also save to file and record filepath
         filepath = save_research_to_file(job_id, research_data)
+        job["research_file"] = filepath  # <-- Record the file path
+        save_db(db)
         print(f"   📄 Research saved to: {filepath}")
     
     # Return summary for completion message
@@ -244,10 +245,11 @@ def create_design_doc(job_id, job_description, context=None):
     # Save design doc to job
     if job:
         job["design_doc"] = design_doc
-        save_db(db)
-        
-        # Also save to file
+
+        # Also save to file and record filepath
         filepath = save_design_to_file(job_id, design_doc)
+        job["design_file"] = filepath  # <-- Record the file path
+        save_db(db)
         print(f"   📄 Design doc saved to: {filepath}")
     
     return f"Design doc created: {design_doc['title']} - {design_doc['overview'][:80]}"
