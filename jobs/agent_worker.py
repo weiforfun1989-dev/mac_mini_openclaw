@@ -309,9 +309,11 @@ def claim_job(job_id, agent_name, estimated_minutes=None):
     
     # Get prefix for agent
     prefixes = {"research": "[Re]", "planning": "[Pl]", "glitch": "[Code]", "mac": "[Mac]"}
+    display_names = {"research": "Sage", "planning": "Atlas", "glitch": "Glitch", "mac": "Mac"}
     prefix = prefixes.get(agent_name.lower(), "")
+    display_name = display_names.get(agent_name.lower(), agent_name)
     
-    print(f"🔨 {prefix} {agent_name} claimed job #{job_id}")
+    print(f"🔨 {prefix} {display_name} claimed job #{job_id}")
     print(f"   Working on: {job['description'][:60]}")
     print(f"   ⏱️  Estimated time: {estimated_minutes} minutes")
     return True

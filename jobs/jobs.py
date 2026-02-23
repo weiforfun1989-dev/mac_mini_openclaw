@@ -17,8 +17,24 @@ JOBS_DB = Path("/Users/wxia/.openclaw/workspace/jobs/jobs-db.json")
 AGENT_TITLES = {
     "Mac": "Mac 🖥️ (Leader)",
     "Glitch": "Glitch ⚡ (Coder)",
-    "Research": "Research 🔍 (Analyst)",
-    "Planning": "Planning 📋 (Architect)"
+    "Sage": "Sage 🔍 (Analyst)",
+    "Atlas": "Atlas 📋 (Architect)"
+}
+
+# Agent short names for prefixes
+AGENT_SHORT_NAMES = {
+    "Sage": "Sage",
+    "Atlas": "Atlas",
+    "Glitch": "Glitch",
+    "Mac": "Mac"
+}
+
+# Map old names to new for backward compatibility
+AGENT_NAME_MAP = {
+    "Research": "Sage",
+    "Planning": "Atlas",
+    "Glitch": "Glitch",
+    "Mac": "Mac"
 }
 
 def get_agent_title(agent_name):
