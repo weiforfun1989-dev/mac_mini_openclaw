@@ -331,6 +331,7 @@ def main():
         print("  coordinator [--daemon]        Mac aggressively pushes all agents to closure")
         print("  poll [--daemon]               Agents actively query for work when idle")
         print("  compact [--daemon|--list]     Archive old jobs to optimize database")
+        print("  master [--daemon]             Master auto-run (combines all services)")
         print("  confirm <job_id>              Confirm a job for dispatch (after Mac review)")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
@@ -719,6 +720,14 @@ def main():
             list_archives()
         else:
             compact_database()
+
+    elif cmd == "master":
+        # Master auto-run daemon - runs entire system automatically
+        from master_daemon import master_daemon, run_once
+        if len(sys.argv) > 2 and sys.argv[2] == "--daemon":
+            master_daemon()
+        else:
+            run_once()
 
     elif cmd == "workflow":
         # Delegate to workflow module
