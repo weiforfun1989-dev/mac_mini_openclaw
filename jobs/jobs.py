@@ -277,6 +277,7 @@ def main():
         print("  notify <message> [level]       Send notification (info/warning/error/urgent)")
         print("  auto [--daemon]               Auto-trigger agents and check for deadlocks")
         print("  coordinator [--daemon]        Mac aggressively pushes all agents to closure")
+        print("  poll [--daemon]               Agents actively query for work when idle")
         print("  confirm <job_id>              Confirm a job for dispatch (after Mac review)")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
@@ -647,6 +648,14 @@ def main():
             run_coordinator()
         else:
             run_single_push()
+    
+    elif cmd == "poll":
+        # Agent auto-poller - agents actively query for work
+        from agent_poller import start_agent_pollers, run_single_poll_cycle
+        if len(sys.argv) > 2 and sys.argv[2] == "--daemon":
+            start_agent_pollers()
+        else:
+            run_single_poll_cycle()
     
     elif cmd == "workflow":
         # Delegate to workflow module
