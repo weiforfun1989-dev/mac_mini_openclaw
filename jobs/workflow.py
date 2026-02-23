@@ -148,6 +148,13 @@ def route_to_next_agent(main_job_id, next_agent_key):
         print(f"❌ Job #{main_job_id} not found")
         return False
     
+    # Check if job needs confirmation from user
+    if main_job.get("needs_confirmation") and not main_job.get("confirmed"):
+        print(f"⚠️  Job #{main_job_id} needs confirmation before dispatching")
+        print(f"   Description: {main_job['description'][:60]}")
+        print(f"   Run: jobs confirm {main_job_id}")
+        return False
+    
     # Create sub-job for the next agent
     desc = f"{agent_name} task for: {main_job['description'][:50]}"
     sub_id = create_job(desc, parent_id=main_job_id, assigned_to=agent_name)

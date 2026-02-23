@@ -35,7 +35,7 @@ def save_db(db):
         finally:
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
-def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"):
+def create_job(description, parent_id=None, assigned_to="Mac", priority="medium", from_user=False):
     """Create a new job or sub-job with atomic ID generation."""
     db = load_db()
     
@@ -64,7 +64,9 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
         "priority": priority,
         "dispatched_by": None,
         "research_result": None,
-        "design_doc": None
+        "design_doc": None,
+        "needs_confirmation": from_user,  # Jobs from user need Mac confirmation
+        "confirmed": False
     }
     
     db["jobs"].append(job)
@@ -79,6 +81,17 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
             save_db(db)
     
     save_db(db)
+    
+    # If from user, create Mac confirmation sub-job
+    if from_user:
+        confirm_id = create_job(
+            f"📝 CONFIRMATION NEEDED: Please review and confirm job #{job_id}",
+            parent_id=job_id,
+            assigned_to="Mac",
+            priority="high"
+        )
+        print(f"   📋 Confirmation job #{confirm_id} created for Mac")
+    
     return job_id
 
 def get_job(db, job_id):
@@ -264,6 +277,7 @@ def main():
         print("  notify <message> [level]       Send notification (info/warning/error/urgent)")
         print("  auto [--daemon]               Auto-trigger agents and check for deadlocks")
         print("  coordinator [--daemon]        Mac aggressively pushes all agents to closure")
+        print("  confirm <job_id>              Confirm a job for dispatch (after Mac review)")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
         print("\nAgent Worker:")
@@ -282,8 +296,9 @@ def main():
     cmd = sys.argv[1]
     
     if cmd == "create":
-        # Parse arguments for priority
+        # Parse arguments for priority and from-user flag
         priority = "medium"
+        from_user = False
         desc_parts = []
         
         i = 2
@@ -291,17 +306,58 @@ def main():
             if sys.argv[i] == "--priority" and i + 1 < len(sys.argv):
                 priority = sys.argv[i + 1]
                 i += 2
+            elif sys.argv[i] == "--from-user":
+                from_user = True
+                i += 1
             else:
                 desc_parts.append(sys.argv[i])
                 i += 1
         
         if not desc_parts:
-            print("Usage: jobs create <description> [--priority high|medium|low]")
+            print("Usage: jobs create <description> [--priority high|medium|low] [--from-user]")
             sys.exit(1)
         
         desc = " ".join(desc_parts)
-        job_id = create_job(desc, priority=priority)
-        print(f"Created job #{job_id} [{priority}]: {desc}")
+        job_id = create_job(desc, priority=priority, from_user=from_user)
+        if from_user:
+            print(f"Created job #{job_id} [{priority}] [NEEDS CONFIRMATION]: {desc}")
+            print(f"   Mac will review before dispatching to agents")
+        else:
+            print(f"Created job #{job_id} [{priority}]: {desc}")
+
+    elif cmd == "confirm":
+        # Confirm a job that needs user approval
+        if len(sys.argv) < 3:
+            print("Usage: jobs confirm <job_id>")
+            print("\nConfirms a job that was created from user request.")
+            print("Mac can then dispatch it to appropriate agents.")
+            sys.exit(1)
+        
+        job_id = int(sys.argv[2])
+        db = load_db()
+        job = get_job(db, job_id)
+        
+        if not job:
+            print(f"Job #{job_id} not found")
+            sys.exit(1)
+        
+        if not job.get("needs_confirmation"):
+            print(f"Job #{job_id} doesn't need confirmation")
+            sys.exit(0)
+        
+        if job.get("confirmed"):
+            print(f"Job #{job_id} already confirmed")
+            sys.exit(0)
+        
+        job["confirmed"] = True
+        job["confirmed_at"] = datetime.now().isoformat()
+        job["notes"] = "Confirmed by user, ready for dispatch"
+        save_db(db)
+        
+        print(f"✅ Job #{job_id} confirmed!")
+        print(f"   Description: {job['description'][:60]}")
+        print(f"   Mac can now dispatch to appropriate agents")
+        print(f"   Run: jobs dispatch  # to start workflow")
     
     elif cmd == "sub":
         if len(sys.argv) < 4:
