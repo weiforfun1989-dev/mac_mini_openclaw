@@ -1756,7 +1756,62 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 61,
+      "display_id": "61",
+      "parent_id": null,
+      "sub_job_sequence": null,
+      "description": "Research Alibaba voice box project - voice cloning technology capabilities and use cases",
+      "status": "DONE",
+      "assigned_to": "Sage",
+      "created_at": "2026-02-23T12:44:27.944143",
+      "completed_at": "2026-02-23T14:29:23.745961",
+      "sub_jobs": [
+        62
+      ],
+      "notes": "Voice cloning research complete. \n\nFINDINGS:\n1. Qwen3-TTS - Alibaba open-source TTS model with voice cloning\n2. Voicebox - Desktop app built on Qwen3-TTS (installed to /Applications)\n3. Capabilities: Clone voice from seconds of audio, local processing, Metal acceleration\n\nINSTALLATION:\n- Voicebox GUI app: /Applications/Voicebox.app (287MB)\n- Python API: Dependency conflicts with accelerate package\n\nUSAGE:\n- Launch Voicebox.app for GUI interface\n- Import audio sample \u2192 Clone voice \u2192 Generate speech\n",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": "Mac",
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": true,
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T14:26:50.668901"
+    },
+    {
+      "id": 62,
+      "display_id": "61/1",
+      "parent_id": 61,
+      "sub_job_sequence": 1,
+      "description": "\ud83d\udcdd CONFIRMATION NEEDED: Please review and confirm job #61",
+      "status": "DONE",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T12:44:27.946769",
+      "completed_at": "2026-02-23T14:26:50.669783",
+      "sub_jobs": [],
+      "notes": "Confirmed by Mac",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "high",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 60
+  "lastJobId": 62
 }
