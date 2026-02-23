@@ -4175,7 +4175,118 @@
       "sub_jobs": [],
       "notes": "",
       "priority": "high"
+    },
+    {
+      "id": 184,
+      "parent_id": null,
+      "description": "Research AI trends",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Research",
+      "created_at": "2026-02-22T23:12:10.356619",
+      "completed_at": "2026-02-22T23:12:20.323861",
+      "sub_jobs": [
+        187
+      ],
+      "notes": "Research completed on 'Research AI trends' with industry best practices and standards",
+      "estimated_minutes": 30,
+      "started_at": "2026-02-22T23:12:18.189710",
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": "Mac",
+      "research_result": {
+        "query": "Research AI trends",
+        "timestamp": "2026-02-22T23:12:20.271539",
+        "sources": [],
+        "summary": ""
+      },
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false,
+      "claimed_at": "2026-02-22T23:12:18.189705",
+      "claimed_by": "Research"
+    },
+    {
+      "id": 185,
+      "parent_id": null,
+      "description": "Design API structure",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Planning",
+      "created_at": "2026-02-22T23:12:10.364153",
+      "completed_at": "2026-02-22T23:12:22.436030",
+      "sub_jobs": [
+        187
+      ],
+      "notes": "Design doc created: Design: Design API structure - Implementation plan for Design API structure",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T23:12:20.338747",
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": "Mac",
+      "research_result": null,
+      "design_doc": {
+        "title": "Design: Design API structure",
+        "timestamp": "2026-02-22T23:12:22.421917",
+        "overview": "Implementation plan for Design API structure",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "needs_confirmation": false,
+      "confirmed": false,
+      "claimed_at": "2026-02-22T23:12:20.338745",
+      "claimed_by": "Planning"
+    },
+    {
+      "id": 186,
+      "parent_id": null,
+      "description": "Implement feature",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Glitch",
+      "created_at": "2026-02-22T23:12:10.370644",
+      "completed_at": "2026-02-22T23:12:24.547813",
+      "sub_jobs": [
+        187
+      ],
+      "notes": "Implemented core functionality with tests",
+      "estimated_minutes": 60,
+      "started_at": "2026-02-22T23:12:22.460912",
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": "Mac",
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false,
+      "claimed_at": "2026-02-22T23:12:22.460899",
+      "claimed_by": "Glitch"
     }
   ],
-  "lastJobId": 183
+  "lastJobId": 186
 }
