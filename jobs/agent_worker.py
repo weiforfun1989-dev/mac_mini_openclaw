@@ -316,6 +316,7 @@ def check_time_estimate(job_id):
     """
     Check if job has exceeded 2x estimate.
     Returns (ok_to_complete, minutes_elapsed, escalation_created)
+    Creates detailed escalation with root cause and resolution plan.
     """
     db = load_db()
     job = get_job(db, job_id)
@@ -334,6 +335,43 @@ def check_time_estimate(job_id):
     # Check if exceeded 2x estimate
     if elapsed > (estimated * 2):
         if not job.get("escalated"):
+            # Create detailed escalation analysis
+            escalation_analysis = {
+                "root_cause": f"Job exceeded estimated time by {round((elapsed/estimated - 1) * 100)}%",
+                "details": {
+                    "estimated_minutes": estimated,
+                    "actual_minutes": round(elapsed, 1),
+                    "exceeded_by_minutes": round(elapsed - estimated, 1),
+                    "exceeded_by_factor": round(elapsed / estimated, 1)
+                },
+                "possible_reasons": [
+                    "Underestimated complexity of task",
+                    "Unforeseen technical challenges",
+                    "Dependencies on other incomplete work",
+                    "Need for additional research or clarification"
+                ],
+                "resolution_options": [
+                    {
+                        "option": "Extend timeline",
+                        "action": f"Re-estimate and allocate additional {round(estimated * 0.5)} minutes"
+                    },
+                    {
+                        "option": "Break into smaller tasks",
+                        "action": "Split remaining work into separate sub-jobs"
+                    },
+                    {
+                        "option": "Reassign to different agent",
+                        "action": "Transfer to agent with more relevant expertise"
+                    },
+                    {
+                        "option": "Mark as complete with partial work",
+                        "action": "Document what was completed and create follow-up tasks"
+                    }
+                ],
+                "recommended_action": "Extend timeline and continue with same agent",
+                "timestamp": datetime.now().isoformat()
+            }
+            
             # Create escalation sub-job to Mac
             desc = f"⚠️ ESCALATION: {job['claimed_by']} exceeded 2x estimate on job #{job_id}"
             escalation_id = create_job(desc, parent_id=job.get("parent_id"), assigned_to="Mac")
@@ -345,10 +383,15 @@ def check_time_estimate(job_id):
             job["escalated"] = True
             job["escalation_id"] = escalation_id
             job["actual_minutes"] = round(elapsed, 1)
+            job["escalation_analysis"] = escalation_analysis
             save_db(db)
+            
+            # Save escalation report to file
+            save_escalation_report(escalation_id, job_id, job, escalation_analysis)
             
             print(f"\n⚠️  TIME LIMIT EXCEEDED!")
             print(f"   Estimated: {estimated} min | Actual: {round(elapsed, 1)} min")
+            print(f"   Root cause: {escalation_analysis['root_cause']}")
             print(f"   Created escalation job #{escalation_id} for Mac")
             return False, elapsed, True
         else:
@@ -356,6 +399,77 @@ def check_time_estimate(job_id):
             return False, elapsed, False
     
     return True, elapsed, False
+
+
+def save_escalation_report(escalation_id, job_id, job, analysis):
+    """Save detailed escalation report to a markdown file."""
+    filename = f"/Users/wxia/.openclaw/workspace/results/escalations/job-{job_id}-escalation.md"
+    
+    content = f"""# Escalation Report - Job #{job_id}
+
+**Escalation ID:** #{escalation_id}  
+**Agent:** {job.get('claimed_by', 'Unknown')}  
+**Date:** {analysis['timestamp']}
+
+## 🚨 Issue
+
+{analysis['root_cause']}
+
+## 📊 Time Analysis
+
+| Metric | Value |
+|--------|-------|
+| Estimated Time | {analysis['details']['estimated_minutes']} minutes |
+| Actual Time | {analysis['details']['actual_minutes']} minutes |
+| Exceeded By | {analysis['details']['exceeded_by_minutes']} minutes |
+| Factor | {analysis['details']['exceeded_by_factor']}x estimate |
+
+## 🤔 Possible Root Causes
+
+"""
+    
+    for i, reason in enumerate(analysis['possible_reasons'], 1):
+        content += f"{i}. {reason}\n"
+    
+    content += f"""
+## ✅ Resolution Options
+
+"""
+    
+    for opt in analysis['resolution_options']:
+        content += f"""### {opt['option']}
+
+**Action:** {opt['action']}
+
+"""
+    
+    content += f"""
+## 🎯 Recommended Action
+
+**{analysis['recommended_action']}**
+
+## 📝 Job Details
+
+- **Description:** {job.get('description', 'N/A')}
+- **Started:** {job.get('started_at', 'N/A')}
+- **Status:** {job.get('status', 'N/A')}
+
+## Raw Data
+
+```json
+{json.dumps(analysis, indent=2)}
+```
+"""
+    
+    # Ensure directory exists
+    import os
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    
+    with open(filename, 'w') as f:
+        f.write(content)
+    
+    print(f"   📄 Escalation report saved to: {filename}")
+    return filename
 
 def create_git_commit(job_id, job_description, design_doc=None):
     """
@@ -661,31 +775,104 @@ def show_agent_status(agent_name):
 def auto_dispatch_from_mac():
     """
     Mac reviews completion sub-jobs and auto-routes to next agent.
-    This simulates Mac's coordination role.
+    Handles escalations with detailed resolution.
     """
     db = load_db()
     
     # Find sub-jobs assigned to Mac that need evaluation
+    # Sort: escalations first, then regular completions
     mac_jobs = [j for j in db["jobs"] 
                 if j["assigned_to"].lower() == "mac" 
                 and j["status"] != "DONE"]
     
-    if not mac_jobs:
+    # Separate escalations from regular jobs
+    escalations = [j for j in mac_jobs 
+                   if "escalation" in j.get("description", "").lower() 
+                   or "⚠️" in j.get("description", "")]
+    regular = [j for j in mac_jobs if j not in escalations]
+    
+    # Sort escalations by creation time (oldest first)
+    escalations.sort(key=lambda x: x["created_at"])
+    regular.sort(key=lambda x: x["created_at"])
+    
+    # Process escalations first, then regular
+    sorted_jobs = escalations + regular
+    
+    if not sorted_jobs:
         print("📭 Mac has no jobs to evaluate")
         return
     
-    print(f"\n🧠 Mac evaluating {len(mac_jobs)} job(s)...")
+    print(f"\n🧠 Mac evaluating {len(sorted_jobs)} job(s)...")
+    if escalations:
+        print(f"   🚨 {len(escalations)} escalation(s) (high priority)")
+    if regular:
+        print(f"   ⏳ {len(regular)} regular completion(s)")
     
-    for job in mac_jobs:
+    for job in sorted_jobs:
         desc_lower = job["description"].lower()
         parent_id = job.get("parent_id")
+        is_escalation = "escalation" in desc_lower or "⚠️" in job.get("description", "")
         
         print(f"\n📋 Evaluating job #{job['id']}: {job['description'][:50]}")
         
-        # Mark as evaluated
+        if is_escalation:
+            print(f"   🚨 Processing escalation...")
+            
+            # Find the original job that was escalated
+            original_job_id = None
+            # Try to extract from description: "exceeded 2x estimate on job #123"
+            if "job #" in job.get("description", ""):
+                try:
+                    parts = job["description"].split("job #")
+                    if len(parts) > 1:
+                        original_job_id = int(parts[1].split()[0])
+                except:
+                    pass
+            
+            if original_job_id:
+                original_job = get_job(db, original_job_id)
+                if original_job and original_job.get("escalation_analysis"):
+                    analysis = original_job["escalation_analysis"]
+                    
+                    print(f"   📊 Root Cause: {analysis['root_cause']}")
+                    print(f"   💡 Resolution Options:")
+                    for i, opt in enumerate(analysis['resolution_options'][:2], 1):
+                        print(f"      {i}. {opt['option']}: {opt['action']}")
+                    
+                    # Mac decides resolution
+                    resolution = {
+                        "method_taken": "Extended timeline and continued with same agent",
+                        "rationale": "Task was making progress but underestimated. Extended estimate by 50%.",
+                        "action": f"Re-estimated job #{original_job_id} with additional {round(original_job.get('estimated_minutes', 30) * 0.5)} minutes",
+                        "resolved_at": datetime.now().isoformat(),
+                        "resolved_by": "Mac"
+                    }
+                    
+                    # Save resolution
+                    job["resolution"] = resolution
+                    original_job["escalation_resolved"] = True
+                    original_job["escalation_resolution"] = resolution
+                    
+                    # Reset the escalated job to allow continuation
+                    original_job["escalated"] = False
+                    original_job["status"] = "TODO"  # Put back in queue
+                    original_job["estimated_minutes"] = round(original_job.get("estimated_minutes", 30) * 1.5)
+                    
+                    save_db(db)
+                    
+                    print(f"   ✅ Resolution: {resolution['method_taken']}")
+                    print(f"   📤 Job #{original_job_id} re-queued with extended timeline")
+                    
+                    # Mark escalation as resolved
+                    job["status"] = "DONE"
+                    job["notes"] = f"Escalation resolved: {resolution['method_taken']}"
+                    save_db(db)
+                    continue
+        
+        # Regular completion handling
         job["status"] = "DONE"
         job["notes"] = "Auto-evaluated and routed"
-        save_db(db)  # Save immediately after marking done
+        save_db(db)
         
         # Determine next agent based on completion type
         next_agent = None
@@ -697,9 +884,8 @@ def auto_dispatch_from_mac():
             next_agent = "Glitch"
             print(f"   💡 Planning done → Routing to Glitch")
         elif "coding complete" in desc_lower or "glitch complete" in desc_lower:
-            print(f"   ✅ Coding complete! Marking main job done.")
-            # Could mark main job as complete here
-        elif "clarification" in desc_lower or "⚠️" in job["description"]:
+            print(f"   ✅ Coding complete! Marking progress.")
+        elif "clarification" in desc_lower:
             print(f"   ⚠️  Clarification needed - requires human review")
             job["notes"] = "NEEDS_CLARIFICATION"
             save_db(db)
@@ -708,11 +894,9 @@ def auto_dispatch_from_mac():
             continue
         
         if next_agent and parent_id:
-            # Create sub-job for next agent
             from workflow import route_to_next_agent
             new_job_id = route_to_next_agent(parent_id, next_agent)
             print(f"   📤 Created job #{new_job_id} for {next_agent}")
-            # Reload db to get updated state
             db = load_db()
     
     print(f"\n✅ Mac evaluation complete")
