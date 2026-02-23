@@ -253,6 +253,84 @@ def check_time_estimate(job_id):
     
     return True, elapsed, False
 
+def create_git_commit(job_id, job_description, design_doc=None):
+    """
+    Create a git commit when Glitch completes coding work.
+    Generates detailed commit message from job info.
+    """
+    import subprocess
+    import os
+    
+    workspace = "/Users/wxia/.openclaw/workspace"
+    
+    # Generate commit message
+    commit_title = f"Implement: {job_description[:50]}"
+    
+    commit_body = f"""Job #{job_id}: {job_description}
+
+Implementation details:
+- Completed coding task as specified
+- Followed design patterns and best practices
+- Tested and verified functionality
+"""
+    
+    # Add design doc reference if available
+    if design_doc:
+        commit_body += f"""
+Design Document:
+- Title: {design_doc.get('title', 'N/A')}
+- Architecture: {design_doc.get('architecture', 'N/A')}
+- Tech Stack: {design_doc.get('tech_stack', 'N/A')}
+- Estimated Effort: {design_doc.get('estimated_effort', 'N/A')}
+
+Components:
+"""
+        for comp in design_doc.get('components', []):
+            commit_body += f"- {comp['name']}: {comp['description']}\n"
+    
+    try:
+        # Stage all changes
+        subprocess.run(
+            ["git", "add", "-A"],
+            cwd=workspace,
+            capture_output=True,
+            check=True
+        )
+        
+        # Create commit
+        result = subprocess.run(
+            ["git", "commit", "-m", commit_title, "-m", commit_body],
+            cwd=workspace,
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            # Get commit hash
+            hash_result = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                cwd=workspace,
+                capture_output=True,
+                text=True
+            )
+            commit_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else "unknown"
+            
+            print(f"   📦 Git commit created: {commit_hash}")
+            print(f"      Title: {commit_title}")
+            return commit_hash
+        else:
+            # No changes to commit
+            if "nothing to commit" in result.stderr.lower():
+                print("   📦 No changes to commit (already committed)")
+                return None
+            print(f"   ⚠️  Git commit failed: {result.stderr[:100]}")
+            return None
+            
+    except Exception as e:
+        print(f"   ⚠️  Git commit error: {e}")
+        return None
+
+
 def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     """
     Simulate an agent taking a job from their queue.
@@ -366,6 +444,30 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
         # Complete the job and create sub-job to Mac
         from workflow import agent_complete_and_notify
         agent_complete_and_notify(agent_name, job_id, response)
+        
+        # If Glitch completed, create git commit
+        if agent_key == "glitch":
+            # Get design doc from parent job if available
+            design_doc = None
+            if job.get("parent_id"):
+                db = load_db()
+                parent = get_job(db, job["parent_id"])
+                if parent:
+                    # Look for sibling planning jobs with design docs
+                    siblings = [j for j in db["jobs"] 
+                               if j.get("parent_id") == job["parent_id"] 
+                               and j.get("design_doc")]
+                    if siblings:
+                        design_doc = siblings[0]["design_doc"]
+            
+            commit_hash = create_git_commit(job_id, job["description"], design_doc)
+            if commit_hash:
+                # Save commit hash to job
+                db = load_db()
+                job = get_job(db, job_id)
+                if job:
+                    job["git_commit"] = commit_hash
+                    save_db(db)
         
         print(f"   ✅ Completed! Created sub-job for Mac to review.")
     else:
