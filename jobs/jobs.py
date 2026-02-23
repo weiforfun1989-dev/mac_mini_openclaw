@@ -37,6 +37,63 @@ AGENT_NAME_MAP = {
     "Mac": "Mac"
 }
 
+
+def calculate_estimated_time(agent_name, description):
+    """Calculate realistic estimated time based on task type and complexity."""
+    desc_lower = description.lower()
+    word_count = len(description.split())
+    
+    # Base estimates by agent type
+    base_estimates = {
+        "research": 25,
+        "planning": 35,
+        "glitch": 45,
+        "mac": 10
+    }
+    
+    agent_key = agent_name.lower()
+    base = base_estimates.get(agent_key, 30)
+    
+    # Complexity multipliers based on keywords
+    complexity_factors = []
+    
+    if agent_key == "research":
+        if any(k in desc_lower for k in ["architecture", "framework", "system", "platform"]):
+            complexity_factors.append(1.5)
+        if any(k in desc_lower for k in ["security", "performance", "scalability"]):
+            complexity_factors.append(1.3)
+        if word_count > 15:
+            complexity_factors.append(1.2)
+            
+    elif agent_key == "planning":
+        if any(k in desc_lower for k in ["architecture", "system design", "infrastructure"]):
+            complexity_factors.append(1.6)
+        if any(k in desc_lower for k in ["database", "api", "microservices"]):
+            complexity_factors.append(1.4)
+        if word_count > 12:
+            complexity_factors.append(1.2)
+            
+    elif agent_key == "glitch":
+        if any(k in desc_lower for k in ["authentication", "payment", "security"]):
+            complexity_factors.append(1.7)
+        if any(k in desc_lower for k in ["integration", "api", "database"]):
+            complexity_factors.append(1.4)
+        if any(k in desc_lower for k in ["frontend", "ui", "interface"]):
+            complexity_factors.append(1.2)
+        if word_count > 10:
+            complexity_factors.append(1.15)
+    
+    multiplier = 1.0
+    for factor in complexity_factors:
+        multiplier *= factor
+    
+    multiplier = min(multiplier, 2.5)
+    estimate = int(base * multiplier)
+    estimate = round(estimate / 5) * 5
+    estimate = max(10, min(estimate, 120))
+    
+    return estimate
+
 def get_agent_title(agent_name):
     """Get the full title for an agent."""
     return AGENT_TITLES.get(agent_name, agent_name)
