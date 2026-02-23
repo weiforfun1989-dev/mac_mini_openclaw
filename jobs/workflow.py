@@ -103,14 +103,20 @@ def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=Fa
     # Auto-route to next agent based on who just completed
     print(f"\n🔄 {display_name} completed job #{job_id}")
 
-    if agent_key_lower == "research":
-        # Auto-route to Atlas for planning
+    if agent_key_lower in ["research", "sage"]:
+        # Auto-route to Atlas for planning - create sub-job
         print(f"   Auto-routing to Atlas for planning...")
-        return dispatch_to_agent(main_job_id, "planning")
-    elif agent_key_lower == "planning":
-        # Auto-route to Glitch for coding
+        desc = f"[Pl] Design: Based on research from job #{job_id}"
+        sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Atlas")
+        print(f"   Created planning sub-job #{sub_id}")
+        return sub_id
+    elif agent_key_lower in ["planning", "atlas"]:
+        # Auto-route to Glitch for coding - create sub-job
         print(f"   Auto-routing to Glitch for implementation...")
-        return dispatch_to_agent(main_job_id, "coding")
+        desc = f"[Code] Implement: Based on design from job #{job_id}"
+        sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Glitch")
+        print(f"   Created implementation sub-job #{sub_id}")
+        return sub_id
     elif agent_key_lower == "glitch":
         # All done - workflow complete
         print(f"   ✅ All work complete!")
