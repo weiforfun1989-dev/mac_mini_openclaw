@@ -35,7 +35,7 @@ def save_db(db):
         finally:
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
-def create_job(description, parent_id=None, assigned_to="Mac"):
+def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"):
     """Create a new job or sub-job."""
     db = load_db()
     db["lastJobId"] += 1
@@ -57,7 +57,8 @@ def create_job(description, parent_id=None, assigned_to="Mac"):
         "retry_count": 0,
         "max_retries": 3,
         "last_heartbeat": None,
-        "health_status": "healthy"
+        "health_status": "healthy",
+        "priority": priority
     }
     
     db["jobs"].append(job)
@@ -191,16 +192,24 @@ def create_completion_subjob(parent_id, agent_name, summary):
     return sub_id
 
 def get_pending_for_agent(agent):
-    """Get all pending jobs for a specific agent."""
+    """Get all pending jobs for a specific agent, sorted by priority."""
     db = load_db()
-    return [j for j in db["jobs"] if j["assigned_to"] == agent and j["status"] != "DONE"]
+    pending = [j for j in db["jobs"] if j["assigned_to"] == agent and j["status"] != "DONE"]
+    
+    # Priority order: high > medium > low
+    priority_order = {"high": 3, "medium": 2, "low": 1}
+    
+    # Sort by priority (descending), then by creation time (ascending)
+    pending.sort(key=lambda j: (-priority_order.get(j.get("priority", "medium"), 2), j["created_at"]))
+    
+    return pending
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: jobs <command> [args]")
         print("\nCommands:")
-        print("  create <description>          Create a new job")
-        print("  sub <parent_id> <desc>        Create a sub-job")
+        print("  create <description> [--priority high|medium|low]  Create a new job")
+        print("  sub <parent_id> <desc> [--priority p]  Create a sub-job")
         print("  assign <id> <agent>           Assign job to agent")
         print("  complete <id> [notes]         Mark job as complete")
         print("  list [status] [agent]         List jobs")
@@ -232,12 +241,26 @@ def main():
     cmd = sys.argv[1]
     
     if cmd == "create":
-        if len(sys.argv) < 3:
-            print("Usage: jobs create <description>")
+        # Parse arguments for priority
+        priority = "medium"
+        desc_parts = []
+        
+        i = 2
+        while i < len(sys.argv):
+            if sys.argv[i] == "--priority" and i + 1 < len(sys.argv):
+                priority = sys.argv[i + 1]
+                i += 2
+            else:
+                desc_parts.append(sys.argv[i])
+                i += 1
+        
+        if not desc_parts:
+            print("Usage: jobs create <description> [--priority high|medium|low]")
             sys.exit(1)
-        desc = " ".join(sys.argv[2:])
-        job_id = create_job(desc)
-        print(f"Created job #{job_id}: {desc}")
+        
+        desc = " ".join(desc_parts)
+        job_id = create_job(desc, priority=priority)
+        print(f"Created job #{job_id} [{priority}]: {desc}")
     
     elif cmd == "sub":
         if len(sys.argv) < 4:
