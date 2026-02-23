@@ -785,7 +785,62 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 29,
+      "display_id": "29",
+      "parent_id": null,
+      "sub_job_sequence": null,
+      "description": "Enforce workflow compliance: Prevent Mac from implementing directly, must dispatch to agents",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T01:47:33.716721",
+      "completed_at": null,
+      "sub_jobs": [
+        30
+      ],
+      "notes": "Confirmed via dashboard",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": true,
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:47:45.920402"
+    },
+    {
+      "id": 30,
+      "display_id": "29/1",
+      "parent_id": 29,
+      "sub_job_sequence": 1,
+      "description": "\ud83d\udcdd CONFIRMATION NEEDED: Please review and confirm job #29",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T01:47:33.718153",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "high",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 28
+  "lastJobId": 30
 }
