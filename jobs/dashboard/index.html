@@ -146,6 +146,31 @@
             transition: background 0.2s;
         }
         .agent-card-queue-item:hover { background: rgba(255,255,255,0.1); }
+        
+        /* Progress bar for in-progress jobs */
+        .job-progress-container {
+            margin-top: 6px;
+            height: 4px;
+            background: #2a2a4a;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .job-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f0a500, #ff6b35);
+            transition: width 1s ease;
+            animation: progress-pulse 2s infinite;
+        }
+        @keyframes progress-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .job-progress-text {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+        }
+        
         .agent-card-empty {
             color: #666; font-style: italic;
             padding: 10px; text-align: center;
@@ -455,6 +480,61 @@
             return html;
         }
 
+        function calculateJobProgress(job) {
+            if (!job.started_at || !job.estimated_minutes) return 0;
+            
+            const startTime = new Date(job.started_at).getTime();
+            const now = Date.now();
+            const elapsed = (now - startTime) / 1000 / 60; // minutes
+            
+            // Cap at 95% until actually done
+            const progress = Math.min(95, (elapsed / job.estimated_minutes) * 100);
+            return Math.round(progress);
+        }
+
+        function renderInProgressJobs(jobs, agent, maxInitial = 3) {
+            const key = `${agent}-inprogress`;
+            const isExpanded = expandedQueues[key];
+            const displayJobs = isExpanded ? jobs : jobs.slice(0, maxInitial);
+            
+            let html = displayJobs.map(job => {
+                const progress = calculateJobProgress(job);
+                const elapsed = job.started_at ? 
+                    Math.round((Date.now() - new Date(job.started_at).getTime()) / 1000 / 60) : 0;
+                const estimated = job.estimated_minutes || 30;
+                const remaining = Math.max(0, estimated - elapsed);
+                
+                return `
+                    <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})' style="flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                            <span>${getStatusIcon(job.status)}</span>
+                            <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                            <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
+                            <span style="color: #f0a500; font-size: 0.8em; font-weight: bold;">${progress}%</span>
+                        </div>
+                        <div style="width: 100%; margin-top: 8px; padding-left: 24px;">
+                            <div class="job-progress-container">
+                                <div class="job-progress-bar" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="job-progress-text">
+                                ⏱️ ${elapsed}m elapsed / ${estimated}m estimated (${remaining}m remaining)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (jobs.length > maxInitial) {
+                html += `
+                    <div class="expand-link" onclick="event.stopPropagation(); toggleQueueExpansion('${agent}', 'inprogress')">
+                        ${isExpanded ? '▼ Show less' : `▲ Show ${jobs.length - maxInitial} more...`}
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
         function renderAgentsOverview() {
             const container = document.getElementById('agents-overview');
             
@@ -492,7 +572,7 @@
                         ${inProgress.length > 0 ? `
                             <div class="agent-card-queue">
                                 <div class="agent-card-queue-title">🔨 In Progress (${inProgress.length})</div>
-                                ${renderAgentQueueItems(inProgress, agent, 'inprogress', 3)}
+                                ${renderInProgressJobs(inProgress, agent, 3)}
                             </div>
                         ` : ''}
                         ${pending.length > 0 ? `
