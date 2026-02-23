@@ -398,64 +398,109 @@
             }
 
             body.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">Job ID:</span>
-                    <span class="detail-value">#${job.id}</span>
+                <div style="background: rgba(123,44,191,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #7b2cbf;">
+                    <div style="font-size: 1.3em; font-weight: bold; margin-bottom: 10px;">
+                        ${job.parent_id ? '📋 Sub-job' : '📁 Main Job'} #${job.id} ${job.display_id ? `[${job.display_id}]` : ''}
+                    </div>
+                    <div style="font-size: 1.1em; line-height: 1.5;">${job.description}</div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Description:</span>
-                    <span class="detail-value">${job.description}</span>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="detail-row" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value" style="font-size: 1.2em;">${getStatusIcon(job.status)} ${job.status}</span>
+                    </div>
+                    <div class="detail-row" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
+                        <span class="detail-label">Assigned To:</span>
+                        <span class="detail-value" style="color: #00d4ff; font-weight: bold;">${job.assigned_to}</span>
+                    </div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value">${getStatusIcon(job.status)} ${job.status}</span>
+                
+                ${job.parent_id ? `
+                    <div class="detail-row" style="background: rgba(255,193,7,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #ffc107;">
+                        <span class="detail-label">📁 Parent Job:</span>
+                        <span class="detail-value">#${job.parent_id} (This is a sub-task of the main job)</span>
+                    </div>
+                ` : ''}
+                
+                ${job.sub_jobs && job.sub_jobs.length > 0 ? `
+                    <div class="detail-row" style="background: rgba(0,255,136,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #00ff88;">
+                        <span class="detail-label">📂 Sub-jobs:</span>
+                        <span class="detail-value">${job.sub_jobs.length} sub-task(s): ${job.sub_jobs.join(', ')}</span>
+                    </div>
+                ` : ''}
+                
+                ${job.needs_confirmation ? `
+                    <div class="detail-row" style="background: rgba(255,193,7,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #ffc107;">
+                        <span class="detail-label">📝 Confirmation:</span>
+                        <span class="detail-value">${job.confirmed ? '✅ Confirmed on ' + formatDate(job.confirmed_at) : '⏳ Pending confirmation from Mac'}</span>
+                    </div>
+                ` : ''}
+                
+                <div style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #888;">⏱️ Timeline</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Created:</span>
+                        <span class="detail-value">${formatDate(job.created_at)}</span>
+                    </div>
+                    ${job.started_at ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Started:</span>
+                            <span class="detail-value">${formatDate(job.started_at)}</span>
+                        </div>
+                    ` : ''}
+                    ${job.completed_at ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Completed:</span>
+                            <span class="detail-value">${formatDate(job.completed_at)}</span>
+                        </div>
+                    ` : ''}
+                    ${job.estimated_minutes ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Estimated Time:</span>
+                            <span class="detail-value">${formatDuration(job.estimated_minutes)}</span>
+                        </div>
+                    ` : ''}
+                    ${job.completed_at && job.started_at ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Actual Duration:</span>
+                            <span class="detail-value" style="color: ${Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 60000) > job.estimated_minutes ? '#ff6b6b' : '#00ff88'};">
+                                ${formatDuration(Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 60000))}
+                                ${Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 60000) > job.estimated_minutes ? '⚠️ Over estimate' : '✅ Within estimate'}
+                            </span>
+                        </div>
+                    ` : ''}
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Assigned To:</span>
-                    <span class="detail-value">${job.assigned_to}</span>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    ${job.priority ? `
+                        <div class="detail-row" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
+                            <span class="detail-label">Priority:</span>
+                            <span class="detail-value" style="text-transform: uppercase; font-weight: bold; color: ${job.priority === 'high' ? '#ff6b6b' : job.priority === 'medium' ? '#f0a500' : '#00d4ff'};">${job.priority}</span>
+                        </div>
+                    ` : ''}
+                    ${job.dispatched_by ? `
+                        <div class="detail-row" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
+                            <span class="detail-label">Dispatched By:</span>
+                            <span class="detail-value">${job.dispatched_by}</span>
+                        </div>
+                    ` : ''}
                 </div>
-                ${job.dispatched_by ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Dispatched By:</span>
-                        <span class="detail-value">${job.dispatched_by}</span>
+                
+                ${job.git_commit ? `
+                    <div class="detail-row" style="background: rgba(0,255,136,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #00ff88;">
+                        <span class="detail-label">📦 Git Commit:</span>
+                        <span class="detail-value" style="font-family: monospace; color: #00ff88;">${job.git_commit}</span>
                     </div>
                 ` : ''}
-                <div class="detail-row">
-                    <span class="detail-label">Created:</span>
-                    <span class="detail-value">${formatDate(job.created_at)}</span>
-                </div>
-                ${job.started_at ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Started:</span>
-                        <span class="detail-value">${formatDate(job.started_at)}</span>
+                
+                ${job.notes ? `
+                    <div style="background: rgba(0,212,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #00d4ff;">
+                        <h4 style="margin-bottom: 10px; color: #00d4ff;">📝 Notes</h4>
+                        <div style="line-height: 1.6;">${job.notes}</div>
                     </div>
                 ` : ''}
-                ${job.completed_at ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Completed:</span>
-                        <span class="detail-value">${formatDate(job.completed_at)}</span>
-                    </div>
-                ` : ''}
-                ${job.estimated_minutes ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Estimated:</span>
-                        <span class="detail-value">${formatDuration(job.estimated_minutes)}</span>
-                    </div>
-                ` : ''}
-                ${job.completed_at && job.started_at ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Actual Duration:</span>
-                        <span class="detail-value">${formatDuration(
-                            Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 60000)
-                        )}</span>
-                    </div>
-                ` : ''}
-                ${job.priority ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Priority:</span>
-                        <span class="detail-value">${job.priority}</span>
-                    </div>
-                ` : ''}
+                
                 ${extraContent}
             `;
 
