@@ -52,9 +52,17 @@ def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=Fa
         print(f"❌ Job #{job_id} not found")
         return False
     
+    # Atomic check: don't re-complete already done jobs
+    if job["status"] == "DONE":
+        print(f"⚠️  Job #{job_id} already completed")
+        return job.get("parent_id")
+    
     # Mark original job as complete
     notes = "Needs clarification: " + summary if needs_clarification else summary
     complete_job(job_id, notes)
+    
+    # Reload DB after completion
+    db = load_db()
     
     # Find the main job (root parent)
     main_job_id = job_id

@@ -36,7 +36,10 @@ def save_db(db):
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"):
-    """Create a new job or sub-job."""
+    """Create a new job or sub-job with atomic ID generation."""
+    db = load_db()
+    
+    # Atomic ID generation - reload DB to get latest ID
     db = load_db()
     db["lastJobId"] += 1
     job_id = db["lastJobId"]
@@ -66,12 +69,14 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
     
     db["jobs"].append(job)
     
-    # If this is a sub-job, add to parent's sub_jobs list
+    # If this is a sub-job, add to parent's sub_jobs list atomically
     if parent_id:
+        db = load_db()  # Reload to get latest state
         parent = get_job(db, parent_id)
         if parent:
             parent["sub_jobs"].append(job_id)
             parent["status"] = "IN_PROGRESS"
+            save_db(db)
     
     save_db(db)
     return job_id
