@@ -474,22 +474,19 @@ def main():
         print(f"✅ Job #{job_id} confirmed!")
         print(f"   Description: {job['description'][:60]}")
 
-        # Auto-dispatch if requested
-        auto_dispatch = "--dispatch" in sys.argv or "-d" in sys.argv
+        # Auto-dispatch by default (or if --dispatch flag used for backwards compatibility)
+        auto_dispatch = True  # Always dispatch after confirmation
         if auto_dispatch:
             print(f"\n🚀 Auto-dispatching to Sage for research...")
             from workflow import dispatch_to_agent
             try:
                 sub_id = dispatch_to_agent(job_id, "research")
                 if sub_id:
-                    print(f"   ✅ Dispatched! Sub-job #{sub_id} created")
+                    print(f"   ✅ Dispatched! Sub-job created for Sage")
                 else:
                     print(f"   ⚠️  Could not dispatch (job may need manual review)")
             except Exception as e:
                 print(f"   ❌ Dispatch failed: {e}")
-        else:
-            print(f"   Mac can now dispatch to appropriate agents")
-            print(f"   Run: jobctl dispatch  # or confirm with --dispatch flag")
 
     elif cmd == "sub":
         if len(sys.argv) < 4:

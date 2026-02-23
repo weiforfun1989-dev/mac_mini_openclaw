@@ -104,19 +104,16 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
             from datetime import datetime
             job["confirmed"] = True
             job["confirmed_at"] = datetime.now().isoformat()
-            job["notes"] = "Confirmed via dashboard"
+            job["notes"] = "Confirmed via dashboard, auto-dispatched"
             save_db(db)
             
-            # Auto-dispatch if requested
-            if auto_dispatch:
-                from workflow import dispatch_to_agent
-                try:
-                    dispatch_to_agent(job_id, "research")
-                    dispatch_result = "Dispatched to Sage"
-                except Exception as e:
-                    dispatch_result = f"Dispatch failed: {e}"
-            else:
-                dispatch_result = None
+            # Always auto-dispatch after confirmation
+            from workflow import dispatch_to_agent
+            try:
+                dispatch_to_agent(job_id, "research")
+                dispatch_result = "Auto-dispatched to Sage"
+            except Exception as e:
+                dispatch_result = f"Dispatch failed: {e}"
             
             response = json.dumps({
                 "success": True,

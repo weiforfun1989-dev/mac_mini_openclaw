@@ -197,7 +197,62 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 8,
+      "display_id": "8",
+      "parent_id": null,
+      "sub_job_sequence": null,
+      "description": "Every request from user should be automatically recorded as a task in the job system",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Sage",
+      "created_at": "2026-02-23T01:14:47.657696",
+      "completed_at": null,
+      "sub_jobs": [
+        9
+      ],
+      "notes": "Confirmed via dashboard",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": "Mac",
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": true,
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:14:59.054575"
+    },
+    {
+      "id": 9,
+      "display_id": "8/1",
+      "parent_id": 8,
+      "sub_job_sequence": 1,
+      "description": "\ud83d\udcdd CONFIRMATION NEEDED: Please review and confirm job #8",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T01:14:47.658557",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "high",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 7
+  "lastJobId": 9
 }

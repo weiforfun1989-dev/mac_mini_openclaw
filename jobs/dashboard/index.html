@@ -689,13 +689,10 @@
                             Created: ${formatDate(job.created_at)} | Assigned to: ${job.assigned_to}
                         </div>
                     </div>
-                    <button onclick="confirmJob(${job.id}, false)" 
-                            style="padding: 8px 16px; background: #ffc107; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        Confirm
-                    </button>
                     <button onclick="confirmJob(${job.id}, true)" 
-                            style="padding: 8px 16px; background: #00d4ff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        Confirm & Dispatch
+                            style="padding: 10px 20px; background: #00d4ff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em;"
+                            title="Confirm and automatically dispatch to Sage">
+                        ✅ Confirm & Dispatch
                     </button>
                 </div>
             `).join('');
