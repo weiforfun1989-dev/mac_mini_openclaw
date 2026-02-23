@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from jobs import load_db, get_job, save_db
-from agent_worker import simulate_agent_work, get_agent_pending_jobs, MAX_CONCURRENT_PER_AGENT
+from agent_worker import simulate_agent_work, get_agent_pending_jobs
 
 # Configuration
 POLL_INTERVAL = 5  # seconds between queue checks
