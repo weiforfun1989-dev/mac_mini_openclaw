@@ -151,6 +151,9 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
         # Main job: use continuous number
         display_id = str(job_id)
 
+    # Calculate estimated time based on agent and description
+    estimated_minutes = calculate_estimated_time(assigned_to, description)
+
     job = {
         "id": job_id,
         "display_id": display_id,
@@ -163,7 +166,7 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
         "completed_at": None,
         "sub_jobs": [],
         "notes": "",
-        "estimated_minutes": None,
+        "estimated_minutes": estimated_minutes,
         "started_at": None,
         "escalated": False,
         "retry_count": 0,

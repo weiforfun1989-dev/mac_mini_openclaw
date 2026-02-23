@@ -1,0 +1,48 @@
+{
+  "workspace_path": "/Users/wxia/.openclaw/workspace",
+  "jobs_db_path": "jobs/jobs-db.json",
+  "archive_path": "jobs/archive",
+  "results_path": "results",
+  "dashboard_port": 8765,
+  "poll_interval": 5,
+  "max_concurrent_per_agent": 1,
+  "escalation_multiplier": 2.0,
+  "max_retries": 3,
+  "stuck_job_timeout_minutes": 30,
+  "compact_days": 7,
+  "agents": {
+    "sage": {
+      "name": "Sage",
+      "title": "Sage 🔍 (Analyst)",
+      "base_estimate_minutes": 25,
+      "keywords": {
+        "complex": ["architecture", "framework", "system", "platform"],
+        "technical": ["security", "performance", "scalability"]
+      }
+    },
+    "atlas": {
+      "name": "Atlas",
+      "title": "Atlas 📋 (Architect)",
+      "base_estimate_minutes": 35,
+      "keywords": {
+        "complex": ["architecture", "system design", "infrastructure"],
+        "technical": ["database", "api", "microservices"]
+      }
+    },
+    "glitch": {
+      "name": "Glitch",
+      "title": "Glitch ⚡ (Coder)",
+      "base_estimate_minutes": 45,
+      "keywords": {
+        "security_critical": ["authentication", "payment", "security"],
+        "integration": ["integration", "api", "database"],
+        "ui": ["frontend", "ui", "interface"]
+      }
+    },
+    "mac": {
+      "name": "Mac",
+      "title": "Mac 🖥️ (Leader)",
+      "base_estimate_minutes": 10
+    }
+  }
+}
