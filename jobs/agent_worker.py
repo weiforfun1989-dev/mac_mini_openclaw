@@ -540,8 +540,16 @@ Components:
             commit_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else "unknown"
             
             # Push to GitHub
+            branch_result = subprocess.run(
+                ["git", "branch", "--show-current"],
+                cwd=workspace,
+                capture_output=True,
+                text=True
+            )
+            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "main"
+            
             push_result = subprocess.run(
-                ["git", "push", "origin", "HEAD"],
+                ["git", "push", "-u", "origin", branch],
                 cwd=workspace,
                 capture_output=True,
                 text=True
