@@ -703,6 +703,18 @@
             }).join('');
         }
 
+        // Track expanded main jobs
+        let expandedJobs = new Set();
+
+        function toggleJobExpansion(jobId) {
+            if (expandedJobs.has(jobId)) {
+                expandedJobs.delete(jobId);
+            } else {
+                expandedJobs.add(jobId);
+            }
+            renderAllJobs();
+        }
+
         function renderAllJobs() {
             const container = document.getElementById('jobs-container');
             const mainJobs = allJobsData.filter(j => j.parent_id === null);
@@ -717,23 +729,72 @@
                 return;
             }
 
-            // Simple list view for all jobs
             container.innerHTML = mainJobs
                 .sort((a, b) => b.id - a.id)
-                .map(job => `
-                    <div class="agent-card" style="margin-bottom: 15px; cursor: pointer;" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: bold;">#${job.id}: ${job.description}</span>
-                            <span style="color: ${job.status === 'DONE' ? '#00ff88' : job.status === 'IN_PROGRESS' ? '#f0a500' : '#00d4ff'};">
-                                ${getStatusIcon(job.status)} ${job.status}
-                            </span>
+                .map(job => {
+                    const isExpanded = expandedJobs.has(job.id);
+                    const subJobs = allJobsData.filter(j => j.parent_id === job.id);
+                    const progress = subJobs.length > 0
+                        ? Math.round((subJobs.filter(j => j.status === 'DONE').length / subJobs.length) * 100)
+                        : (job.status === 'DONE' ? 100 : 0);
+
+                    let subJobsHtml = '';
+                    if (isExpanded && subJobs.length > 0) {
+                        subJobsHtml = `
+                            <div style="margin-top: 15px; padding-left: 20px; border-left: 3px solid #2a2a4a;">
+                                <div style="color: #888; font-size: 0.85em; margin-bottom: 10px;">
+                                    📁 Sub-jobs (${subJobs.length}):
+                                </div>
+                                ${subJobs.sort((a, b) => a.id - b.id).map(sub => `
+                                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px;
+                                                background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 8px;">
+                                        <span style="font-size: 1.1em;">${getStatusIcon(sub.status)}</span>
+                                        <span style="font-family: monospace; color: #888; font-size: 0.85em; min-width: 60px;">
+                                            ${sub.display_id || sub.id}
+                                        </span>
+                                        <span style="flex: 1; font-size: 0.95em;">${sub.description}</span>
+                                        <span style="color: #666; font-size: 0.8em; background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 4px;">
+                                            ${sub.assigned_to}
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="agent-card" style="margin-bottom: 15px; transition: all 0.2s;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;"
+                                 onclick="toggleJobExpansion(${job.id})">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: bold; font-size: 1.1em;">
+                                            ${isExpanded ? '▼' : '▶'} #${job.id}
+                                        </span>
+                                        <span>${job.description}</span>
+                                    </div>
+                                    <div style="color: #888; font-size: 0.85em; margin-top: 6px; margin-left: 30px;">
+                                        👤 ${job.assigned_to} | 📅 ${formatDate(job.created_at)}
+                                        ${subJobs.length > 0 ? `| 📁 ${subJobs.filter(j => j.status === 'DONE').length}/${subJobs.length} sub-jobs done` : ''}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="color: ${job.status === 'DONE' ? '#00ff88' : job.status === 'IN_PROGRESS' ? '#f0a500' : '#00d4ff'};">
+                                        ${getStatusIcon(job.status)} ${job.status}
+                                    </span>
+                                    ${subJobs.length > 0 ? `
+                                        <div style="margin-top: 5px;">
+                                            <div style="width: 100px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                                <div style="width: ${progress}%; height: 100%; background: ${progress === 100 ? '#00ff88' : '#00d4ff'}; transition: width 0.3s;"></div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            ${subJobsHtml}
                         </div>
-                        <div style="color: #888; font-size: 0.9em; margin-top: 8px;">
-                            👤 ${job.assigned_to} | 📅 ${formatDate(job.created_at)}
-                            ${job.dispatched_by ? `| 📤 Dispatched by: ${job.dispatched_by}` : ''}
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
         }
 
         async function loadJobs() {
