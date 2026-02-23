@@ -539,8 +539,23 @@ Components:
             )
             commit_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else "unknown"
             
-            print(f"   📦 Git commit created: {commit_hash}")
-            print(f"      Title: {commit_title}")
+            # Push to GitHub
+            push_result = subprocess.run(
+                ["git", "push", "origin", "HEAD"],
+                cwd=workspace,
+                capture_output=True,
+                text=True
+            )
+            
+            if push_result.returncode == 0:
+                print(f"   📦 Git commit created and pushed: {commit_hash}")
+                print(f"      Title: {commit_title}")
+                print(f"      Pushed to GitHub")
+            else:
+                print(f"   📦 Git commit created: {commit_hash}")
+                print(f"      Title: {commit_title}")
+                print(f"      ⚠️  Push failed: {push_result.stderr[:100]}")
+            
             return commit_hash
         else:
             # No changes to commit
