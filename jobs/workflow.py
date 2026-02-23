@@ -24,6 +24,13 @@ AGENTS = {
     "mac": "Mac"
 }
 
+AGENT_PREFIXES = {
+    "research": "[Re]",
+    "planning": "[Pl]",
+    "glitch": "[Code]",
+    "mac": "[Mac]"
+}
+
 def dispatch_to_agent(job_id, agent_key):
     """Dispatch a job to a specific agent."""
     agent_name = AGENTS.get(agent_key.lower(), agent_key)
@@ -72,11 +79,12 @@ def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=Fa
             break
         main_job_id = j["parent_id"]
     
-    # Create completion sub-job to Mac
+    # Create completion sub-job to Mac with prefix
+    prefix = AGENT_PREFIXES.get(agent_key.lower(), "")
     if needs_clarification:
-        desc = f"⚠️ {agent_name} needs clarification on #{main_job_id}: {summary}"
+        desc = f"⚠️ {prefix} {agent_name} needs clarification on #{main_job_id}: {summary}"
     else:
-        desc = f"✅ {agent_name} complete for #{main_job_id}: {summary}"
+        desc = f"✅ {prefix} {agent_name} complete for #{main_job_id}: {summary}"
     
     sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Mac")
     
@@ -138,6 +146,13 @@ def mac_evaluate_and_route(sub_job_id):
     print(f"\n🤔 Unclear next step. Manual review needed.")
     return "UNCLEAR"
 
+AGENT_PREFIXES = {
+    "research": "[Re]",
+    "planning": "[Pl]",
+    "glitch": "[Code]",
+    "mac": "[Mac]"
+}
+
 def route_to_next_agent(main_job_id, next_agent_key):
     """Route a main job to the next agent in the workflow."""
     agent_name = AGENTS.get(next_agent_key.lower(), next_agent_key)
@@ -155,8 +170,9 @@ def route_to_next_agent(main_job_id, next_agent_key):
         print(f"   Run: jobs confirm {main_job_id}")
         return False
     
-    # Create sub-job for the next agent
-    desc = f"{agent_name} task for: {main_job['description'][:50]}"
+    # Create sub-job for the next agent with prefix
+    prefix = AGENT_PREFIXES.get(next_agent_key.lower(), "")
+    desc = f"{prefix} {agent_name} task for: {main_job['description'][:50]}"
     sub_id = create_job(desc, parent_id=main_job_id, assigned_to=agent_name)
     
     print(f"📤 Created sub-job #{sub_id} for {agent_name}")

@@ -307,7 +307,11 @@ def claim_job(job_id, agent_name, estimated_minutes=None):
     job["estimated_minutes"] = estimated_minutes
     save_db(db)
     
-    print(f"🔨 {agent_name} claimed job #{job_id}")
+    # Get prefix for agent
+    prefixes = {"research": "[Re]", "planning": "[Pl]", "glitch": "[Code]", "mac": "[Mac]"}
+    prefix = prefixes.get(agent_name.lower(), "")
+    
+    print(f"🔨 {prefix} {agent_name} claimed job #{job_id}")
     print(f"   Working on: {job['description'][:60]}")
     print(f"   ⏱️  Estimated time: {estimated_minutes} minutes")
     return True
