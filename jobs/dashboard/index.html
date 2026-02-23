@@ -258,10 +258,12 @@
     <div class="agent-filter">
         <button class="agent-btn" onclick="switchView('all')">All Jobs</button>
         <button class="agent-btn active" onclick="switchView('agents')">Agent Queues</button>
+        <button class="agent-btn" onclick="switchView('workflow')">📊 Workflow</button>
     </div>
 
     <div class="agents-overview" id="agents-overview"></div>
     <div class="jobs-container" id="jobs-container" style="display: none;"></div>
+    <div class="workflow-container" id="workflow-container" style="display: none;"></div>
 
     <div class="refresh-info">
         Auto-refreshes every 5 seconds • Last updated: <span id="last-updated">--</span>
@@ -329,13 +331,16 @@
             document.querySelectorAll('.agent-btn').forEach((btn, index) => {
                 btn.classList.toggle('active',
                     (view === 'all' && index === 0) ||
-                    (view === 'agents' && index === 1));
+                    (view === 'agents' && index === 1) ||
+                    (view === 'workflow' && index === 2));
             });
 
             document.getElementById('agents-overview').style.display = view === 'agents' ? 'block' : 'none';
             document.getElementById('jobs-container').style.display = view === 'all' ? 'block' : 'none';
+            document.getElementById('workflow-container').style.display = view === 'workflow' ? 'block' : 'none';
 
             if (view === 'all') renderAllJobs();
+            else if (view === 'workflow') renderWorkflowView();
             else renderAgentsOverview();
         }
 
@@ -701,6 +706,172 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function renderWorkflowView() {
+            const container = document.getElementById('workflow-container');
+            
+            // Calculate stats for each agent
+            const stats = {};
+            AGENTS.forEach(agent => {
+                const jobs = allJobsData.filter(j => 
+                    j.assigned_to.toLowerCase() === agent.toLowerCase()
+                );
+                stats[agent] = {
+                    pending: jobs.filter(j => j.status === 'TODO').length,
+                    inProgress: jobs.filter(j => j.status === 'IN_PROGRESS').length,
+                    done: jobs.filter(j => j.status === 'DONE').length,
+                    total: jobs.length
+                };
+            });
+
+            container.innerHTML = `
+                <div style="padding: 20px;">
+                    <h2 style="text-align: center; margin-bottom: 30px;">📊 Job Dispatch Workflow</h2>
+                    
+                    <!-- Workflow Diagram -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 900px; margin: 0 auto;">
+                        
+                        <!-- User to Mac -->
+                        <div style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center;">
+                            <div style="padding: 15px 30px; background: rgba(100,100,100,0.2); border-radius: 10px; border: 2px solid #666;">
+                                <div style="font-size: 1.5em;">👤</div>
+                                <div style="font-size: 0.9em; color: #aaa;">User</div>
+                            </div>
+                            <div style="flex: 1; height: 3px; background: linear-gradient(90deg, #666, #7b2cbf); position: relative;">
+                                <div style="position: absolute; right: -5px; top: -5px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #7b2cbf;"></div>
+                                <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75em; color: #888; white-space: nowrap;">Request</div>
+                            </div>
+                            
+                            <div style="padding: 20px 40px; background: rgba(123,44,191,0.2); border-radius: 15px; border: 3px solid #7b2cbf; box-shadow: 0 0 20px rgba(123,44,191,0.3);">
+                                <div style="font-size: 2em; text-align: center;">🖥️</div>
+                                <div style="font-weight: bold; color: #7b2cbf;">Mac</div>
+                                <div style="font-size: 0.75em; color: #aaa;">Leader / Coordinator</div>
+                                <div style="margin-top: 10px; font-size: 0.8em;">
+                                    <span style="color: #f0a500;">${stats.Mac.inProgress} 🔄</span>
+                                    <span style="color: #00d4ff; margin-left: 8px;">${stats.Mac.pending} ⏳</span>
+                                    <span style="color: #00ff88; margin-left: 8px;">${stats.Mac.done} ✅</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Down arrow -->
+                        <div style="width: 3px; height: 40px; background: linear-gradient(180deg, #7b2cbf, #00d4ff); position: relative;">
+                            <div style="position: absolute; bottom: -8px; left: -4px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 10px solid #00d4ff;"></div>
+                            <div style="position: absolute; left: 15px; top: 10px; font-size: 0.75em; color: #888;">Dispatch</div>
+                        </div>
+                        
+                        <!-- Work Agents Row -->
+                        <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;">
+                            
+                            <!-- Sage -->
+                            <div style="text-align: center;">
+                                <div style="padding: 15px 25px; background: rgba(0,212,255,0.15); border-radius: 12px; border: 2px solid #00d4ff;">
+                                    <div style="font-size: 1.8em;">🔍</div>
+                                    <div style="font-weight: bold; color: #00d4ff;">Sage</div>
+                                    <div style="font-size: 0.7em; color: #aaa;">Analyst</div>
+                                    <div style="margin-top: 8px; font-size: 0.75em;">
+                                        <span style="color: #f0a500;">${stats.Sage.inProgress} 🔄</span>
+                                        <span style="color: #00d4ff; margin-left: 6px;">${stats.Sage.pending} ⏳</span>
+                                        <span style="color: #00ff88; margin-left: 6px;">${stats.Sage.done} ✅</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; color: #666; font-size: 0.8em;">Research</div>
+                            </div>
+                            
+                            <!-- Arrow -->
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 30px; height: 2px; background: #00d4ff; position: relative;">
+                                    <div style="position: absolute; right: -5px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #00d4ff;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Atlas -->
+                            <div style="text-align: center;">
+                                <div style="padding: 15px 25px; background: rgba(147,51,234,0.15); border-radius: 12px; border: 2px solid #9333ea;">
+                                    <div style="font-size: 1.8em;">📋</div>
+                                    <div style="font-weight: bold; color: #9333ea;">Atlas</div>
+                                    <div style="font-size: 0.7em; color: #aaa;">Architect</div>
+                                    <div style="margin-top: 8px; font-size: 0.75em;">
+                                        <span style="color: #f0a500;">${stats.Atlas.inProgress} 🔄</span>
+                                        <span style="color: #00d4ff; margin-left: 6px;">${stats.Atlas.pending} ⏳</span>
+                                        <span style="color: #00ff88; margin-left: 6px;">${stats.Atlas.done} ✅</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; color: #666; font-size: 0.8em;">Design</div>
+                            </div>
+                            
+                            <!-- Arrow -->
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 30px; height: 2px; background: #9333ea; position: relative;">
+                                    <div style="position: absolute; right: -5px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #9333ea;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Glitch -->
+                            <div style="text-align: center;">
+                                <div style="padding: 15px 25px; background: rgba(240,165,0,0.15); border-radius: 12px; border: 2px solid #f0a500;">
+                                    <div style="font-size: 1.8em;">⚡</div>
+                                    <div style="font-weight: bold; color: #f0a500;">Glitch</div>
+                                    <div style="font-size: 0.7em; color: #aaa;">Coder</div>
+                                    <div style="margin-top: 8px; font-size: 0.75em;">
+                                        <span style="color: #f0a500;">${stats.Glitch.inProgress} 🔄</span>
+                                        <span style="color: #00d4ff; margin-left: 6px;">${stats.Glitch.pending} ⏳</span>
+                                        <span style="color: #00ff88; margin-left: 6px;">${stats.Glitch.done} ✅</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; color: #666; font-size: 0.8em;">Implement</div>
+                            </div>
+                            
+                            <!-- Arrow back to Mac -->
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 30px; height: 2px; background: #f0a500; position: relative;">
+                                    <div style="position: absolute; right: -5px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #f0a500;"></div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Up arrow to Mac -->
+                        <div style="width: 3px; height: 40px; background: linear-gradient(180deg, #f0a500, #7b2cbf); position: relative;">
+                            <div style="position: absolute; top: -8px; left: -4px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid #7b2cbf;"></div>
+                            <div style="position: absolute; right: 15px; top: 10px; font-size: 0.75em; color: #888;">Complete</div>
+                        </div>
+                        
+                        <!-- Final status -->
+                        <div style="padding: 15px 30px; background: rgba(0,255,136,0.15); border-radius: 10px; border: 2px solid #00ff88;">
+                            <div style="font-size: 1.5em;">✅</div>
+                            <div style="font-weight: bold; color: #00ff88;">DONE</div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Workflow Stats Summary -->
+                    <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 900px; margin-left: auto; margin-right: auto;">
+                        <div style="background: rgba(123,44,191,0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(123,44,191,0.3);">
+                            <div style="color: #7b2cbf; font-weight: bold; margin-bottom: 10px;">🖥️ Mac (Coordinator)</div>
+                            <div style="font-size: 0.9em;">Receives requests, dispatches to agents, reviews completions</div>
+                        </div>
+                        
+                        <div style="background: rgba(0,212,255,0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(0,212,255,0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 10px;">🔍 Sage (Research)</div>
+                            <div style="font-size: 0.9em;">Web search, analysis, documentation with sources</div>
+                        </div>
+                        
+                        <div style="background: rgba(147,51,234,0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(147,51,234,0.3);">
+                            <div style="color: #9333ea; font-weight: bold; margin-bottom: 10px;">📋 Atlas (Planning)</div>
+                            <div style="font-size: 0.9em;">Architecture design, component definition, implementation plans</div>
+                        </div>
+                        
+                        <div style="background: rgba(240,165,0,0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(240,165,0,0.3);">
+                            <div style="color: #f0a500; font-weight: bold; margin-bottom: 10px;">⚡ Glitch (Coding)</div>
+                            <div style="font-size: 0.9em;">Implementation, testing, GitHub commits</div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            `;
         }
 
         // Track expanded main jobs
