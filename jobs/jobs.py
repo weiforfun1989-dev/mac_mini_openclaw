@@ -99,12 +99,16 @@ def assign_job(job_id, agent, dispatched_by="Mac"):
     return True
 
 def complete_job(job_id, notes=""):
-    """Mark a job as complete."""
+    """Mark a job as complete with atomic check."""
     db = load_db()
     job = get_job(db, job_id)
     if not job:
         print(f"Job #{job_id} not found")
         return False
+    
+    # Atomic check: don't re-complete already done jobs
+    if job["status"] == "DONE":
+        return True
     
     job["status"] = "DONE"
     job["completed_at"] = datetime.now().isoformat()

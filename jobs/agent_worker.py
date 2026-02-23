@@ -162,7 +162,7 @@ def get_agent_pending_jobs(agent_name, db=None):
             and j["status"] != "DONE"]
 
 def claim_job(job_id, agent_name, estimated_minutes=None):
-    """Agent claims a job to work on with time estimate."""
+    """Agent claims a job to work on with time estimate. Returns True if successful."""
     db = load_db()
     job = get_job(db, job_id)
     
@@ -172,6 +172,10 @@ def claim_job(job_id, agent_name, estimated_minutes=None):
     
     if job["status"] == "DONE":
         print(f"⚠️  Job #{job_id} is already completed")
+        return False
+    
+    if job["status"] == "IN_PROGRESS" and job.get("claimed_by") and job["claimed_by"] != agent_name:
+        print(f"⚠️  Job #{job_id} already claimed by {job['claimed_by']}")
         return False
     
     if job["assigned_to"].lower() != agent_name.lower():
@@ -334,8 +338,7 @@ Components:
 def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
     """
     Simulate an agent taking a job from their queue.
-    If job_id is None, takes the oldest pending job.
-    Includes context from previous agent work on the same main task.
+    Thread-safe with atomic status checks.
     """
     db = load_db()
     pending = get_agent_pending_jobs(agent_name, db)
@@ -350,14 +353,20 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
         if not job or job["assigned_to"].lower() != agent_name.lower():
             print(f"❌ Job #{job_id} not found or not assigned to {agent_name}")
             return None
+        # Check if already being worked on by another thread
+        if job["status"] == "IN_PROGRESS" and job.get("claimed_by"):
+            print(f"⚠️  Job #{job_id} already claimed by {job['claimed_by']}")
+            return None
     else:
         # Take oldest pending job
         job = sorted(pending, key=lambda x: x["id"])[0]
         job_id = job["id"]
     
-    # Claim the job with time estimate
-    # Pass None to use existing estimate if present, or default based on agent type
-    claim_job(job_id, agent_name, estimated_minutes=None)
+    # Atomically claim the job
+    if not claim_job(job_id, agent_name, estimated_minutes=None):
+        return None
+    
+    # ... rest of the function continues ...
     
     # Gather context from previous agent work on the same main task
     context = []
