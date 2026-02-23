@@ -20,7 +20,7 @@ from agent_worker import (
 
 # Configuration
 CHECK_INTERVAL = 5  # seconds - frequent checks
-MAX_WORKERS = 3  # max concurrent jobs per agent
+MAX_WORKERS = 1  # Only 1 task in progress per agent at a time
 AGENTS = ["Research", "Planning", "Glitch"]  # Work agents (not Mac)
 
 # Thread tracking

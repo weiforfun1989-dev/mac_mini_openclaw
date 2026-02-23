@@ -17,7 +17,7 @@ from agent_worker import simulate_agent_work, process_parallel_jobs
 
 # Configuration
 CHECK_INTERVAL = 10  # seconds between checks
-MAX_CONCURRENT_PER_AGENT = 3  # max parallel jobs per agent
+MAX_CONCURRENT_PER_AGENT = 1  # Only 1 task at a time per agent
 AGENTS = ["Mac", "Glitch", "Research", "Planning"]
 
 # Track which agents are currently working (to prevent duplicate triggers)
