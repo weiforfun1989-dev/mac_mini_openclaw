@@ -4648,7 +4648,57 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 200,
+      "parent_id": null,
+      "description": "Test new names",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T23:30:41.130993",
+      "completed_at": null,
+      "sub_jobs": [
+        201
+      ],
+      "notes": "",
+      "estimated_minutes": null,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
+    },
+    {
+      "id": 201,
+      "parent_id": 200,
+      "description": "[Re] Sage task for: Test new names",
+      "status": "TODO",
+      "assigned_to": "Sage",
+      "created_at": "2026-02-22T23:30:41.135856",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "estimated_minutes": null,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 199
+  "lastJobId": 201
 }
