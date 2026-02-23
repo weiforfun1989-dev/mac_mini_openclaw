@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Dispatch Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0f0f23;
@@ -36,129 +32,15 @@
             gap: 40px;
             margin-top: 20px;
         }
-        .stat {
-            text-align: center;
-        }
+        .stat { text-align: center; }
         .stat-value {
             font-size: 2em;
             font-weight: bold;
             color: #00d4ff;
         }
-        .stat-label {
-            color: #888;
-            font-size: 0.9em;
-        }
-        .jobs-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .job-card {
-            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #2a2a4a;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .job-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
-        }
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .job-id {
-            font-size: 0.85em;
-            color: #888;
-            font-family: monospace;
-        }
-        .job-status {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .status-todo { background: #444; color: #aaa; }
-        .status-in_progress { background: #f0a500; color: #1a1a2e; }
-        .status-done { background: #00d4ff; color: #0f0f23; }
-        .job-title {
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        .job-meta {
-            display: flex;
-            gap: 20px;
-            color: #888;
-            font-size: 0.9em;
-            margin-bottom: 15px;
-        }
-        .job-meta span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .progress-bar {
-            height: 6px;
-            background: #2a2a4a;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-            transition: width 0.5s ease;
-        }
-        .sub-jobs {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #2a2a4a;
-        }
-        .sub-jobs-title {
-            font-size: 0.85em;
-            color: #888;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-        .sub-job {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .sub-job-icon {
-            font-size: 1.2em;
-        }
-        .sub-job-agent {
-            font-size: 0.75em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #333;
-            color: #aaa;
-        }
-        .sub-job-agent.mac { background: #7b2cbf; color: #fff; }
-        .sub-job-agent.glitch { background: #f0a500; color: #1a1a2e; }
-        .sub-job-agent.research { background: #00d4ff; color: #0f0f23; }
-        .sub-job-agent.planning { background: #00ff88; color: #0f0f23; }
-        .sub-job-desc {
-            flex: 1;
-            font-size: 0.9em;
-            color: #ccc;
-        }
-        .refresh-info {
-            text-align: center;
-            color: #666;
-            font-size: 0.85em;
-            margin-top: 30px;
-        }
+        .stat-label { color: #888; font-size: 0.9em; }
+        
+        /* Active Agents */
         .active-agents {
             display: flex;
             justify-content: center;
@@ -182,110 +64,42 @@
         .active-agent-badge.research { border-color: #00d4ff; color: #00d4ff; }
         .active-agent-badge.planning { border-color: #00ff88; color: #00ff88; }
         .active-agent-badge .indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            animation: blink 1s infinite;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: currentColor; animation: blink 1s infinite;
         }
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 5px currentColor; }
             50% { box-shadow: 0 0 20px currentColor; }
         }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        /* Filter buttons */
         .agent-filter {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 10px;
+            margin: 20px 0; flex-wrap: wrap;
         }
         .agent-btn {
-            padding: 8px 16px;
-            border: 1px solid #444;
-            background: #1a1a2e;
-            color: #888;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.9em;
+            padding: 8px 16px; border: 1px solid #444;
+            background: #1a1a2e; color: #888;
+            border-radius: 20px; cursor: pointer;
+            transition: all 0.2s; font-size: 0.9em;
         }
-        .agent-btn:hover {
-            border-color: #00d4ff;
-            color: #fff;
-        }
+        .agent-btn:hover { border-color: #00d4ff; color: #fff; }
         .agent-btn.active {
-            background: #00d4ff;
-            color: #0f0f23;
-            border-color: #00d4ff;
-            font-weight: 600;
+            background: #00d4ff; color: #0f0f23;
+            border-color: #00d4ff; font-weight: 600;
         }
-        .agent-view {
-            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #2a2a4a;
-        }
-        .agent-view-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .agent-view-title {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        .agent-view-stats {
-            display: flex;
-            gap: 20px;
-        }
-        .agent-view-stat {
-            text-align: center;
-        }
-        .agent-view-stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #00d4ff;
-        }
-        .agent-view-stat-label {
-            font-size: 0.75em;
-            color: #888;
-        }
-        .queue-section {
-            margin-top: 20px;
-        }
-        .queue-title {
-            font-size: 0.85em;
-            color: #888;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        .queue-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .agents-overview {
-            margin-bottom: 30px;
-        }
+        
+        /* Agents Grid */
+        .agents-overview { margin-bottom: 30px; }
         .agents-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
         }
         .agent-card {
             background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 12px; padding: 20px;
             border: 1px solid #2a2a4a;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -294,86 +108,103 @@
             box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
         }
         .agent-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #2a2a4a;
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 15px;
+            padding-bottom: 15px; border-bottom: 1px solid #2a2a4a;
         }
-        .agent-card-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .agent-card-name { font-size: 1.3em; font-weight: bold; }
         .agent-card-badge {
-            font-size: 0.75em;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
+            font-size: 0.75em; padding: 4px 10px;
+            border-radius: 12px; font-weight: 600;
         }
         .agent-card-badge.mac { background: #7b2cbf; color: #fff; }
         .agent-card-badge.glitch { background: #f0a500; color: #1a1a2e; }
         .agent-card-badge.research { background: #00d4ff; color: #0f0f23; }
         .agent-card-badge.planning { background: #00ff88; color: #0f0f23; }
         .agent-card-stats {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            display: flex; gap: 15px; margin-bottom: 15px;
         }
         .agent-card-stat {
-            text-align: center;
-            flex: 1;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
+            text-align: center; flex: 1;
+            padding: 10px; background: rgba(0,0,0,0.2);
             border-radius: 8px;
         }
-        .agent-card-stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        .agent-card-stat-value.pending { color: #f0a500; }
-        .agent-card-stat-value.done { color: #00d4ff; }
-        .agent-card-stat-label {
-            font-size: 0.75em;
-            color: #888;
-            margin-top: 4px;
-        }
-        .agent-card-queue {
-            margin-top: 15px;
-        }
+        .agent-card-stat-value { font-size: 1.5em; font-weight: bold; }
+        .agent-card-stat-label { font-size: 0.75em; color: #888; margin-top: 4px; }
+        
+        /* Job Queue Items */
+        .agent-card-queue { margin-top: 15px; }
         .agent-card-queue-title {
-            font-size: 0.8em;
-            color: #888;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+            font-size: 0.8em; color: #888;
+            text-transform: uppercase; margin-bottom: 8px;
         }
         .agent-card-queue-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            background: rgba(0,0,0,0.15);
-            border-radius: 4px;
-            margin-bottom: 6px;
-            font-size: 0.9em;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; background: rgba(0,0,0,0.15);
+            border-radius: 4px; margin-bottom: 6px;
+            font-size: 0.9em; cursor: pointer;
+            transition: background 0.2s;
         }
+        .agent-card-queue-item:hover { background: rgba(255,255,255,0.1); }
         .agent-card-empty {
-            color: #666;
-            font-style: italic;
-            padding: 10px;
-            text-align: center;
+            color: #666; font-style: italic;
+            padding: 10px; text-align: center;
         }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
+        .expand-link {
+            color: #00d4ff; cursor: pointer;
+            text-align: center; padding: 5px;
+            font-size: 0.85em;
         }
-        .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
+        .expand-link:hover { text-decoration: underline; }
+        
+        /* Job Detail Modal */
+        .modal-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000; justify-content: center;
+            align-items: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 12px; padding: 30px;
+            max-width: 600px; width: 100%;
+            max-height: 80vh; overflow-y: auto;
+            border: 1px solid #2a2a4a;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .modal-close {
+            font-size: 1.5em; cursor: pointer;
+            color: #888;
+        }
+        .modal-close:hover { color: #fff; }
+        .detail-row {
+            display: flex; gap: 15px; margin-bottom: 12px;
+            padding: 10px; background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+        .detail-label { color: #888; min-width: 120px; }
+        .detail-value { flex: 1; }
+        .research-result, .design-doc {
+            margin-top: 15px; padding: 15px;
+            background: rgba(0,0,0,0.2); border-radius: 8px;
+            border-left: 3px solid #00d4ff;
+        }
+        .research-result h4, .design-doc h4 {
+            color: #00d4ff; margin-bottom: 10px;
+        }
+        .view-doc-link {
+            color: #00ff88; cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .refresh-info {
+            text-align: center; color: #666;
+            font-size: 0.85em; margin-top: 30px;
         }
     </style>
 </head>
@@ -397,72 +228,50 @@
         </div>
     </div>
 
-    <div class="active-agents" id="active-agents">
-        <!-- Active agents will be shown here -->
-    </div>
+    <div class="active-agents" id="active-agents"></div>
 
     <div class="agent-filter">
-        <button class="agent-btn active" onclick="switchView('all')">All Jobs</button>
-        <button class="agent-btn" onclick="switchView('agents')">Agent Queues</button>
+        <button class="agent-btn" onclick="switchView('all')">All Jobs</button>
+        <button class="agent-btn active" onclick="switchView('agents')">Agent Queues</button>
     </div>
 
-    <div class="agents-overview" id="agents-overview" style="display: none;">
-        <div class="agents-grid" id="agents-grid">
-            <!-- Agent cards will be loaded here -->
-        </div>
-    </div>
-
-    <div class="agent-view" id="agent-view" style="display: none;">
-        <div class="agent-view-header">
-            <div class="agent-view-title" id="agent-view-title">👤 Agent View</div>
-            <div class="agent-view-stats">
-                <div class="agent-view-stat">
-                    <div class="agent-view-stat-value" style="color: #f0a500;" id="agent-inprogress">0</div>
-                    <div class="agent-view-stat-label">In Progress</div>
-                </div>
-                <div class="agent-view-stat">
-                    <div class="agent-view-stat-value" id="agent-pending">0</div>
-                    <div class="agent-view-stat-label">Pending</div>
-                </div>
-                <div class="agent-view-stat">
-                    <div class="agent-view-stat-value" style="color: #00d4ff;" id="agent-completed">0</div>
-                    <div class="agent-view-stat-label">Done</div>
-                </div>
-                <div class="agent-view-stat">
-                    <div class="agent-view-stat-value" id="agent-total">0</div>
-                    <div class="agent-view-stat-label">Total</div>
-                </div>
-            </div>
-        </div>
-        <div class="queue-section" id="agent-inprogress-queue">
-            <div class="queue-title">🔨 In Progress</div>
-            <div id="agent-inprogress-list"></div>
-        </div>
-        <div class="queue-section" id="agent-pending-queue" style="margin-top: 20px;">
-            <div class="queue-title">⏳ Pending</div>
-            <div id="agent-pending-list"></div>
-        </div>
-        <div class="queue-section" id="agent-completed-queue" style="margin-top: 20px;">
-            <div class="queue-title">✅ Completed</div>
-            <div id="agent-completed-list"></div>
-        </div>
-    </div>
-
-    <div class="jobs-container" id="jobs-container">
-        <!-- Jobs will be loaded here -->
-    </div>
+    <div class="agents-overview" id="agents-overview"></div>
+    <div class="jobs-container" id="jobs-container" style="display: none;"></div>
 
     <div class="refresh-info">
         Auto-refreshes every 5 seconds • Last updated: <span id="last-updated">--</span>
     </div>
 
+    <!-- Job Detail Modal -->
+    <div class="modal-overlay" id="job-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Job Details</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script>
         const API_URL = '/api/jobs';
+        let allJobsData = [];
+        let currentView = 'agents';
+        let expandedQueues = {};
+        const AGENTS = ['Mac', 'Glitch', 'Research', 'Planning'];
 
         function formatDate(isoString) {
             if (!isoString) return 'N/A';
             const date = new Date(isoString);
             return date.toLocaleString();
+        }
+
+        function formatDuration(minutes) {
+            if (!minutes) return 'N/A';
+            if (minutes < 60) return `${minutes} min`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
         }
 
         function getStatusClass(status) {
@@ -484,129 +293,186 @@
             return '⏳';
         }
 
-        function calculateProgress(job, allJobs) {
-            if (!job.sub_jobs || job.sub_jobs.length === 0) {
-                return job.status === 'DONE' ? 100 : 0;
-            }
-            const doneCount = job.sub_jobs.filter(id => {
-                const sub = allJobs.find(j => j.id === id);
-                return sub && sub.status === 'DONE';
-            }).length;
-            return Math.round((doneCount / job.sub_jobs.length) * 100);
-        }
-
-        function renderJobCard(job, allJobs) {
-            const progress = calculateProgress(job, allJobs);
-            const subJobsHtml = job.sub_jobs && job.sub_jobs.length > 0 
-                ? job.sub_jobs.map(subId => {
-                    const sub = allJobs.find(j => j.id === subId);
-                    if (!sub) return '';
-                    return `
-                        <div class="sub-job">
-                            <span class="sub-job-icon">${getStatusIcon(sub.status)}</span>
-                            <span class="sub-job-agent ${getAgentClass(sub.assigned_to)}">${sub.assigned_to}</span>
-                            <span class="sub-job-desc">${sub.description}</span>
-                        </div>
-                    `;
-                }).join('')
-                : '';
-
-            return `
-                <div class="job-card">
-                    <div class="job-header">
-                        <span class="job-id">#${job.id}</span>
-                        <span class="job-status ${getStatusClass(job.status)}">${job.status}</span>
-                    </div>
-                    <div class="job-title">${job.description}</div>
-                    <div class="job-meta">
-                        <span>👤 ${job.assigned_to}</span>
-                        <span>📅 ${formatDate(job.created_at)}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progress}%"></div>
-                    </div>
-                    ${subJobsHtml ? `
-                        <div class="sub-jobs">
-                            <div class="sub-jobs-title">Sub-jobs (${job.sub_jobs.length})</div>
-                            ${subJobsHtml}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-
-        function renderEmptyState() {
-            return `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
-                    <h2>No jobs yet</h2>
-                    <p>Create your first job with: <code>jobs create "Your task"</code></p>
-                </div>
-            `;
-        }
-
-        let allJobsData = [];
-        let currentView = 'all';
-
-        const AGENTS = ['Mac', 'Glitch', 'Research', 'Planning'];
-
         function switchView(view) {
             currentView = view;
-            
-            // Update button states
             document.querySelectorAll('.agent-btn').forEach((btn, index) => {
                 btn.classList.toggle('active', 
                     (view === 'all' && index === 0) || 
                     (view === 'agents' && index === 1));
             });
             
-            // Show/hide views
             document.getElementById('agents-overview').style.display = view === 'agents' ? 'block' : 'none';
-            document.getElementById('agent-view').style.display = 'none';
             document.getElementById('jobs-container').style.display = view === 'all' ? 'block' : 'none';
             
-            if (view === 'all') {
-                renderAllJobs();
-            } else if (view === 'agents') {
-                renderAgentsOverview();
+            if (view === 'all') renderAllJobs();
+            else renderAgentsOverview();
+        }
+
+        function showJobDetails(job) {
+            const modal = document.getElementById('job-modal');
+            const body = document.getElementById('modal-body');
+            
+            let extraContent = '';
+            
+            // Research result section
+            if (job.research_result) {
+                extraContent += `
+                    <div class="research-result">
+                        <h4>📚 Research Results</h4>
+                        <p><strong>Query:</strong> ${job.research_result.query}</p>
+                        <p><strong>Summary:</strong> ${job.research_result.summary}</p>
+                        ${job.research_result.sources ? `
+                            <p><strong>Sources:</strong></p>
+                            <ul>
+                                ${job.research_result.sources.map(s => 
+                                    `<li><a href="${s.url}" target="_blank" style="color: #00d4ff;">${s.title}</a></li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                `;
             }
+            
+            // Design doc section
+            if (job.design_doc) {
+                extraContent += `
+                    <div class="design-doc">
+                        <h4>📋 Design Document</h4>
+                        <p><strong>Title:</strong> ${job.design_doc.title}</p>
+                        <p><strong>Overview:</strong> ${job.design_doc.overview}</p>
+                        <p><strong>Architecture:</strong> ${job.design_doc.architecture}</p>
+                        <p><strong>Tech Stack:</strong> ${job.design_doc.tech_stack}</p>
+                        <p><strong>Estimated Effort:</strong> ${job.design_doc.estimated_effort}</p>
+                        ${job.design_doc.components ? `
+                            <p><strong>Components:</strong></p>
+                            <ul>
+                                ${job.design_doc.components.map(c => 
+                                    `<li><strong>${c.name}:</strong> ${c.description}</li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            body.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Job ID:</span>
+                    <span class="detail-value">#${job.id}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description:</span>
+                    <span class="detail-value">${job.description}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value">${getStatusIcon(job.status)} ${job.status}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Assigned To:</span>
+                    <span class="detail-value">${job.assigned_to}</span>
+                </div>
+                ${job.dispatched_by ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Dispatched By:</span>
+                        <span class="detail-value">${job.dispatched_by}</span>
+                    </div>
+                ` : ''}
+                <div class="detail-row">
+                    <span class="detail-label">Created:</span>
+                    <span class="detail-value">${formatDate(job.created_at)}</span>
+                </div>
+                ${job.started_at ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Started:</span>
+                        <span class="detail-value">${formatDate(job.started_at)}</span>
+                    </div>
+                ` : ''}
+                ${job.completed_at ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Completed:</span>
+                        <span class="detail-value">${formatDate(job.completed_at)}</span>
+                    </div>
+                ` : ''}
+                ${job.estimated_minutes ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Estimated:</span>
+                        <span class="detail-value">${formatDuration(job.estimated_minutes)}</span>
+                    </div>
+                ` : ''}
+                ${job.completed_at && job.started_at ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Actual Duration:</span>
+                        <span class="detail-value">${formatDuration(
+                            Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 60000)
+                        )}</span>
+                    </div>
+                ` : ''}
+                ${job.priority ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Priority:</span>
+                        <span class="detail-value">${job.priority}</span>
+                    </div>
+                ` : ''}
+                ${extraContent}
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('job-modal').classList.remove('active');
+        }
+
+        function toggleQueueExpansion(agent, queueType) {
+            const key = `${agent}-${queueType}`;
+            expandedQueues[key] = !expandedQueues[key];
+            renderAgentsOverview();
+        }
+
+        function renderAgentQueueItems(jobs, agent, queueType, maxInitial = 5) {
+            const key = `${agent}-${queueType}`;
+            const isExpanded = expandedQueues[key];
+            const displayJobs = isExpanded ? jobs : jobs.slice(0, maxInitial);
+            
+            let html = displayJobs.map(job => `
+                <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                    <span>${getStatusIcon(job.status)}</span>
+                    <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
+                    ${job.estimated_minutes ? `<span style="color: #666; font-size: 0.8em;">${formatDuration(job.estimated_minutes)}</span>` : ''}
+                </div>
+            `).join('');
+            
+            if (jobs.length > maxInitial) {
+                html += `
+                    <div class="expand-link" onclick="event.stopPropagation(); toggleQueueExpansion('${agent}', '${queueType}')">
+                        ${isExpanded ? '▼ Show less' : `▲ Show ${jobs.length - maxInitial} more...`}
+                    </div>
+                `;
+            }
+            
+            return html;
         }
 
         function renderAgentsOverview() {
-            const grid = document.getElementById('agents-grid');
+            const container = document.getElementById('agents-overview');
             
             const agentCards = AGENTS.map(agent => {
                 const agentJobs = allJobsData.filter(j => 
                     j.assigned_to.toLowerCase() === agent.toLowerCase()
                 );
                 
-                const pending = agentJobs.filter(j => j.status !== 'DONE' && j.status !== 'IN_PROGRESS');
+                const pending = agentJobs.filter(j => j.status === 'TODO');
                 const inProgress = agentJobs.filter(j => j.status === 'IN_PROGRESS');
                 const completed = agentJobs.filter(j => j.status === 'DONE');
                 
                 const badgeClass = agent.toLowerCase();
-                const inProgressQueue = inProgress.slice(0, 3).map(job => `
-                    <div class="agent-card-queue-item" style="border-left: 3px solid #f0a500; padding-left: 8px;">
-                        <span>🔄</span>
-                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
-                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
-                    </div>
-                `).join('');
-                
-                const pendingQueue = pending.slice(0, 5).map(job => `
-                    <div class="agent-card-queue-item">
-                        <span>${getStatusIcon(job.status)}</span>
-                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
-                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${job.description}</span>
-                    </div>
-                `).join('');
                 
                 return `
                     <div class="agent-card">
                         <div class="agent-card-header">
-                            <div class="agent-card-name">
-                                👤 ${agent}
-                            </div>
+                            <div class="agent-card-name">👤 ${agent}</div>
                             <span class="agent-card-badge ${badgeClass}">${agent}</span>
                         </div>
                         <div class="agent-card-stats">
@@ -615,105 +481,35 @@
                                 <div class="agent-card-stat-label">In Progress</div>
                             </div>
                             <div class="agent-card-stat">
-                                <div class="agent-card-stat-value pending">${pending.length}</div>
+                                <div class="agent-card-stat-value" style="color: #00d4ff;">${pending.length}</div>
                                 <div class="agent-card-stat-label">Pending</div>
                             </div>
                             <div class="agent-card-stat">
-                                <div class="agent-card-stat-value done">${completed.length}</div>
+                                <div class="agent-card-stat-value" style="color: #00ff88;">${completed.length}</div>
                                 <div class="agent-card-stat-label">Done</div>
-                            </div>
-                            <div class="agent-card-stat">
-                                <div class="agent-card-stat-value">${agentJobs.length}</div>
-                                <div class="agent-card-stat-label">Total</div>
                             </div>
                         </div>
                         ${inProgress.length > 0 ? `
-                        <div class="agent-card-queue" style="margin-bottom: 15px;">
-                            <div class="agent-card-queue-title">🔨 In Progress (${inProgress.length})</div>
-                            ${inProgressQueue}
-                            ${inProgress.length > 3 ? `<div class="agent-card-empty">... and ${inProgress.length - 3} more</div>` : ''}
-                        </div>
+                            <div class="agent-card-queue">
+                                <div class="agent-card-queue-title">🔨 In Progress (${inProgress.length})</div>
+                                ${renderAgentQueueItems(inProgress, agent, 'inprogress', 3)}
+                            </div>
                         ` : ''}
-                        <div class="agent-card-queue">
-                            <div class="agent-card-queue-title">⏳ Pending Queue (${pending.length})</div>
-                            ${pending.length === 0 ? 
-                                '<div class="agent-card-empty">No pending jobs 🎉</div>' : 
-                                pendingQueue + (pending.length > 5 ? `<div class="agent-card-empty">... and ${pending.length - 5} more</div>` : '')}
-                        </div>
+                        ${pending.length > 0 ? `
+                            <div class="agent-card-queue">
+                                <div class="agent-card-queue-title">⏳ Pending Queue (${pending.length})</div>
+                                ${renderAgentQueueItems(pending, agent, 'pending', 5)}
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
             
-            grid.innerHTML = agentCards;
-        }
-
-        function renderAgentView(agentName) {
-            const agentJobs = allJobsData.filter(j => 
-                j.assigned_to.toLowerCase() === agentName.toLowerCase()
-            );
-            
-            const pending = agentJobs.filter(j => j.status !== 'DONE' && j.status !== 'IN_PROGRESS');
-            const inProgress = agentJobs.filter(j => j.status === 'IN_PROGRESS');
-            const completed = agentJobs.filter(j => j.status === 'DONE');
-            
-            document.getElementById('agent-view-title').textContent = `👤 ${agentName} Agent View`;
-            document.getElementById('agent-pending').textContent = pending.length;
-            document.getElementById('agent-inprogress').textContent = inProgress.length;
-            document.getElementById('agent-completed').textContent = completed.length;
-            document.getElementById('agent-total').textContent = agentJobs.length;
-            
-            // Render in-progress jobs
-            const inProgressList = document.getElementById('agent-inprogress-list');
-            if (inProgress.length === 0) {
-                inProgressList.innerHTML = '<div class="queue-item"><span>No jobs in progress</span></div>';
-            } else {
-                inProgressList.innerHTML = inProgress.sort((a, b) => b.id - a.id).map(job => `
-                    <div class="queue-item" style="border-left: 3px solid #f0a500;">
-                        <span>🔄</span>
-                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
-                        <span style="flex: 1;">${job.description}</span>
-                        ${job.parent_id ? `<span style="font-size: 0.75em; color: #666;">sub of #${job.parent_id}</span>` : ''}
-                    </div>
-                `).join('');
-            }
-            
-            // Render pending jobs
-            const pendingList = document.getElementById('agent-pending-list');
-            if (pending.length === 0) {
-                pendingList.innerHTML = '<div class="queue-item"><span>No pending jobs 🎉</span></div>';
-            } else {
-                pendingList.innerHTML = pending.sort((a, b) => b.id - a.id).map(job => `
-                    <div class="queue-item">
-                        <span>${getStatusIcon(job.status)}</span>
-                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
-                        <span style="flex: 1;">${job.description}</span>
-                        ${job.parent_id ? `<span style="font-size: 0.75em; color: #666;">sub of #${job.parent_id}</span>` : ''}
-                    </div>
-                `).join('');
-            }
-            
-            // Render completed jobs
-            const completedList = document.getElementById('agent-completed-list');
-            if (completed.length === 0) {
-                completedList.innerHTML = '<div class="queue-item"><span>No completed jobs yet</span></div>';
-            } else {
-                completedList.innerHTML = completed.sort((a, b) => b.id - a.id).slice(0, 10).map(job => `
-                    <div class="queue-item">
-                        <span>✅</span>
-                        <span style="font-family: monospace; color: #888;">#${job.id}</span>
-                        <span style="flex: 1; color: #888;">${job.description}</span>
-                    </div>
-                `).join('');
-                if (completed.length > 10) {
-                    completedList.innerHTML += `<div class="queue-item" style="justify-content: center; color: #666;">... and ${completed.length - 10} more</div>`;
-                }
-            }
+            container.innerHTML = `<div class="agents-grid">${agentCards}</div>`;
         }
 
         function renderActiveAgents() {
             const container = document.getElementById('active-agents');
-            
-            // Find agents with IN_PROGRESS jobs
             const activeAgents = AGENTS.filter(agent => {
                 const agentJobs = allJobsData.filter(j => 
                     j.assigned_to.toLowerCase() === agent.toLowerCase() && 
@@ -748,13 +544,32 @@
             const mainJobs = allJobsData.filter(j => j.parent_id === null);
             
             if (mainJobs.length === 0) {
-                container.innerHTML = renderEmptyState();
-            } else {
-                container.innerHTML = mainJobs
-                    .sort((a, b) => b.id - a.id)
-                    .map(job => renderJobCard(job, allJobsData))
-                    .join('');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #666;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📭</div>
+                        <h2>No jobs yet</h2>
+                    </div>
+                `;
+                return;
             }
+            
+            // Simple list view for all jobs
+            container.innerHTML = mainJobs
+                .sort((a, b) => b.id - a.id)
+                .map(job => `
+                    <div class="agent-card" style="margin-bottom: 15px; cursor: pointer;" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold;">#${job.id}: ${job.description}</span>
+                            <span style="color: ${job.status === 'DONE' ? '#00ff88' : job.status === 'IN_PROGRESS' ? '#f0a500' : '#00d4ff'};">
+                                ${getStatusIcon(job.status)} ${job.status}
+                            </span>
+                        </div>
+                        <div style="color: #888; font-size: 0.9em; margin-top: 8px;">
+                            👤 ${job.assigned_to} | 📅 ${formatDate(job.created_at)}
+                            ${job.dispatched_by ? `| 📤 Dispatched by: ${job.dispatched_by}` : ''}
+                        </div>
+                    </div>
+                `).join('');
         }
 
         async function loadJobs() {
@@ -764,37 +579,29 @@
                 
                 allJobsData = data.jobs || [];
                 
-                // Update stats
                 document.getElementById('total-jobs').textContent = allJobsData.length;
                 document.getElementById('active-jobs').textContent = 
                     allJobsData.filter(j => j.status === 'IN_PROGRESS').length;
                 document.getElementById('completed-jobs').textContent = 
                     allJobsData.filter(j => j.status === 'DONE').length;
                 
-                // Render active agents
                 renderActiveAgents();
                 
-                // Render based on current view
-                if (currentView === 'all') {
-                    renderAllJobs();
-                } else if (currentView === 'agents') {
-                    renderAgentsOverview();
-                }
+                if (currentView === 'all') renderAllJobs();
+                else renderAgentsOverview();
                 
                 document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
             } catch (error) {
                 console.error('Failed to load jobs:', error);
-                document.getElementById('jobs-container').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <h2>Failed to load jobs</h2>
-                        <p>${error.message}</p>
-                    </div>
-                `;
             }
         }
 
-        // Load jobs initially and every 5 seconds
+        // Close modal on outside click
+        document.getElementById('job-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'job-modal') closeModal();
+        });
+
+        // Initial load
         loadJobs();
         setInterval(loadJobs, 5000);
     </script>

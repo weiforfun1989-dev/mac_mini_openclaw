@@ -58,7 +58,10 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
         "max_retries": 3,
         "last_heartbeat": None,
         "health_status": "healthy",
-        "priority": priority
+        "priority": priority,
+        "dispatched_by": None,
+        "research_result": None,
+        "design_doc": None
     }
     
     db["jobs"].append(job)
@@ -80,7 +83,7 @@ def get_job(db, job_id):
             return job
     return None
 
-def assign_job(job_id, agent):
+def assign_job(job_id, agent, dispatched_by="Mac"):
     """Assign a job to an agent."""
     db = load_db()
     job = get_job(db, job_id)
@@ -89,6 +92,7 @@ def assign_job(job_id, agent):
         return False
     
     job["assigned_to"] = agent
+    job["dispatched_by"] = dispatched_by
     # Status stays TODO - only becomes IN_PROGRESS when agent claims it
     save_db(db)
     print(f"Job #{job_id} assigned to {agent}")

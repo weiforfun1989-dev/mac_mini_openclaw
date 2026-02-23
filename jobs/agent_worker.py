@@ -54,47 +54,103 @@ AGENT_RESPONSES = {
     ]
 }
 
-def perform_web_research(job_description, context=None):
+def perform_web_research(job_id, job_description, context=None):
     """
     Perform real web research for a job.
-    Returns a summary of findings.
+    Returns a summary of findings and saves full results to job.
     """
+    import subprocess
+    import json
+    
     # Extract key terms from job description for search
     search_terms = job_description.replace("Research task for:", "").replace("Research:", "").strip()
     
     print(f"   🔍 Searching web for: {search_terms[:60]}...")
     
+    research_data = {
+        "query": search_terms,
+        "timestamp": datetime.now().isoformat(),
+        "sources": [],
+        "summary": ""
+    }
+    
     try:
         # Use web_search skill via subprocess
         result = subprocess.run(
             ["python3", "-c", 
-             f"from skills.web_search import web_search; results = web_search('{search_terms[:50]}', count=3); print(json.dumps([r['snippet'] for r in results]))"],
+             f"from skills.web_search import web_search; results = web_search('{search_terms[:50]}', count=5); print(json.dumps(results))"],
             capture_output=True,
             text=True,
             cwd="/Users/wxia/.openclaw/workspace"
         )
         
         if result.returncode == 0 and result.stdout:
-            snippets = json.loads(result.stdout)
-            if snippets:
-                return f"Research findings: {snippets[0][:150]}"
-    except Exception:
-        pass
+            search_results = json.loads(result.stdout)
+            research_data["sources"] = [
+                {"title": r.get("title", ""), "url": r.get("url", ""), "snippet": r.get("snippet", "")}
+                for r in search_results[:5]
+            ]
+            if search_results:
+                research_data["summary"] = search_results[0].get("snippet", "")[:200]
+    except Exception as e:
+        research_data["error"] = str(e)
     
-    # Fallback: research-like response based on the search terms
-    research_topics = {
-        "workflow": "workflow automation best practices, job dispatch patterns, multi-agent systems",
-        "website": "web development frameworks, responsive design, modern UI patterns",
-        "feature": "feature implementation strategies, user requirements analysis",
-        "dashboard": "dashboard design patterns, data visualization, real-time monitoring",
-        "api": "API design principles, RESTful architecture, integration patterns"
+    # Save research results to job
+    db = load_db()
+    job = get_job(db, job_id)
+    if job:
+        job["research_result"] = research_data
+        save_db(db)
+    
+    # Return summary for completion message
+    if research_data["sources"]:
+        return f"Research findings: {research_data['summary']}"
+    
+    # Fallback
+    return f"Research completed on '{search_terms[:50]}' with industry best practices and standards"
+
+
+def create_design_doc(job_id, job_description, context=None):
+    """
+    Create a design document for Planning tasks.
+    Returns a summary and saves full design doc to job.
+    """
+    # Gather context from previous research if available
+    db = load_db()
+    job = get_job(db, job_id)
+    
+    research_context = ""
+    if job and job.get("parent_id"):
+        # Look for research results in sibling jobs
+        parent_id = job["parent_id"]
+        sibling_jobs = [j for j in db["jobs"] 
+                       if j.get("parent_id") == parent_id 
+                       and j["id"] != job_id
+                       and j.get("research_result")]
+        if sibling_jobs:
+            research_context = sibling_jobs[0]["research_result"].get("summary", "")
+    
+    design_doc = {
+        "title": f"Design: {job_description[:50]}",
+        "timestamp": datetime.now().isoformat(),
+        "overview": f"Implementation plan for {job_description}",
+        "components": [
+            {"name": "Core Module", "description": "Main implementation logic"},
+            {"name": "Interface Layer", "description": "API and user interaction"},
+            {"name": "Data Layer", "description": "Storage and persistence"}
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": research_context
     }
     
-    for topic, details in research_topics.items():
-        if topic.lower() in search_terms.lower():
-            return f"Research findings: {details}"
+    # Save design doc to job
+    if job:
+        job["design_doc"] = design_doc
+        save_db(db)
     
-    return f"Research completed on '{search_terms[:50]}' with industry best practices and standards"
+    return f"Design doc created: {design_doc['title']} - {design_doc['overview'][:80]}"
 
 def get_agent_pending_jobs(agent_name, db=None):
     """Get all pending jobs for an agent."""
@@ -291,15 +347,16 @@ def simulate_agent_work(agent_name, job_id=None, auto_complete=False):
         agent_key = agent_name.lower()
         
         if agent_key == "research":
-            # Research agent performs web search
-            response = perform_web_research(job["description"], context if context else None)
+            # Research agent performs web search and saves results
+            response = perform_web_research(job_id, job["description"], context if context else None)
+        elif agent_key == "planning":
+            # Planning agent creates design document
+            response = create_design_doc(job_id, job["description"], context if context else None)
         elif agent_key in AGENT_RESPONSES and AGENT_RESPONSES[agent_key]:
             base_response = random.choice(AGENT_RESPONSES[agent_key])
             
             # Add context reference to the response if available
-            if context and agent_key == "planning":
-                response = f"Based on research findings: {base_response}"
-            elif context and agent_key == "glitch":
+            if context and agent_key == "glitch":
                 response = f"Following the plan: {base_response}"
             else:
                 response = base_response
