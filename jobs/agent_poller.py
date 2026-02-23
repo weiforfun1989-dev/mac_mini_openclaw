@@ -17,6 +17,7 @@ from agent_worker import simulate_agent_work, get_agent_pending_jobs
 
 # Configuration
 POLL_INTERVAL = 5  # seconds between queue checks
+MAX_CONCURRENT_PER_AGENT = 1  # Only 1 task at a time per agent
 AGENTS = ["Research", "Planning", "Glitch"]  # Work agents (Mac handles coordination)
 
 # Track agent states
