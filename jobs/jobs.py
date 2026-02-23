@@ -443,9 +443,11 @@ def main():
     elif cmd == "confirm":
         # Confirm a job that needs user approval
         if len(sys.argv) < 3:
-            print("Usage: jobs confirm <job_id>")
+            print("Usage: jobs confirm <job_id> [--dispatch]")
             print("\nConfirms a job that was created from user request.")
             print("Mac can then dispatch it to appropriate agents.")
+            print("\nOptions:")
+            print("  --dispatch   Auto-dispatch to Sage for research after confirmation")
             sys.exit(1)
 
         job_id = int(sys.argv[2])
@@ -471,8 +473,23 @@ def main():
 
         print(f"✅ Job #{job_id} confirmed!")
         print(f"   Description: {job['description'][:60]}")
-        print(f"   Mac can now dispatch to appropriate agents")
-        print(f"   Run: jobs dispatch  # to start workflow")
+
+        # Auto-dispatch if requested
+        auto_dispatch = "--dispatch" in sys.argv or "-d" in sys.argv
+        if auto_dispatch:
+            print(f"\n🚀 Auto-dispatching to Sage for research...")
+            from workflow import dispatch_to_agent
+            try:
+                sub_id = dispatch_to_agent(job_id, "research")
+                if sub_id:
+                    print(f"   ✅ Dispatched! Sub-job #{sub_id} created")
+                else:
+                    print(f"   ⚠️  Could not dispatch (job may need manual review)")
+            except Exception as e:
+                print(f"   ❌ Dispatch failed: {e}")
+        else:
+            print(f"   Mac can now dispatch to appropriate agents")
+            print(f"   Run: jobctl dispatch  # or confirm with --dispatch flag")
 
     elif cmd == "sub":
         if len(sys.argv) < 4:
