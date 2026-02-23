@@ -39,7 +39,7 @@
             color: #00d4ff;
         }
         .stat-label { color: #888; font-size: 0.9em; }
-        
+
         /* Active Agents */
         .active-agents {
             display: flex;
@@ -72,7 +72,7 @@
             50% { box-shadow: 0 0 20px currentColor; }
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
+
         /* Filter buttons */
         .agent-filter {
             display: flex; justify-content: center; gap: 10px;
@@ -89,7 +89,7 @@
             background: #00d4ff; color: #0f0f23;
             border-color: #00d4ff; font-weight: 600;
         }
-        
+
         /* Agents Grid */
         .agents-overview { margin-bottom: 30px; }
         .agents-grid {
@@ -131,7 +131,7 @@
         }
         .agent-card-stat-value { font-size: 1.5em; font-weight: bold; }
         .agent-card-stat-label { font-size: 0.75em; color: #888; margin-top: 4px; }
-        
+
         /* Job Queue Items */
         .agent-card-queue { margin-top: 15px; }
         .agent-card-queue-title {
@@ -146,7 +146,7 @@
             transition: background 0.2s;
         }
         .agent-card-queue-item:hover { background: rgba(255,255,255,0.1); }
-        
+
         /* Progress bar for in-progress jobs */
         .job-progress-container {
             margin-top: 6px;
@@ -170,7 +170,7 @@
             color: #888;
             margin-top: 4px;
         }
-        
+
         .agent-card-empty {
             color: #666; font-style: italic;
             padding: 10px; text-align: center;
@@ -181,7 +181,7 @@
             font-size: 0.85em;
         }
         .expand-link:hover { text-decoration: underline; }
-        
+
         /* Job Detail Modal */
         .modal-overlay {
             display: none; position: fixed;
@@ -226,7 +226,7 @@
             color: #00ff88; cursor: pointer;
             text-decoration: underline;
         }
-        
+
         .refresh-info {
             text-align: center; color: #666;
             font-size: 0.85em; margin-top: 30px;
@@ -327,14 +327,14 @@
         function switchView(view) {
             currentView = view;
             document.querySelectorAll('.agent-btn').forEach((btn, index) => {
-                btn.classList.toggle('active', 
-                    (view === 'all' && index === 0) || 
+                btn.classList.toggle('active',
+                    (view === 'all' && index === 0) ||
                     (view === 'agents' && index === 1));
             });
-            
+
             document.getElementById('agents-overview').style.display = view === 'agents' ? 'block' : 'none';
             document.getElementById('jobs-container').style.display = view === 'all' ? 'block' : 'none';
-            
+
             if (view === 'all') renderAllJobs();
             else renderAgentsOverview();
         }
@@ -342,9 +342,9 @@
         function showJobDetails(job) {
             const modal = document.getElementById('job-modal');
             const body = document.getElementById('modal-body');
-            
+
             let extraContent = '';
-            
+
             // Research result section
             if (job.research_result) {
                 extraContent += `
@@ -355,7 +355,7 @@
                         ${job.research_result.sources ? `
                             <p><strong>Sources:</strong></p>
                             <ul>
-                                ${job.research_result.sources.map(s => 
+                                ${job.research_result.sources.map(s =>
                                     `<li><a href="${s.url}" target="_blank" style="color: #00d4ff;">${s.title}</a></li>`
                                 ).join('')}
                             </ul>
@@ -363,7 +363,7 @@
                     </div>
                 `;
             }
-            
+
             // Design doc section
             if (job.design_doc) {
                 extraContent += `
@@ -377,7 +377,7 @@
                         ${job.design_doc.components ? `
                             <p><strong>Components:</strong></p>
                             <ul>
-                                ${job.design_doc.components.map(c => 
+                                ${job.design_doc.components.map(c =>
                                     `<li><strong>${c.name}:</strong> ${c.description}</li>`
                                 ).join('')}
                             </ul>
@@ -385,7 +385,7 @@
                     </div>
                 `;
             }
-            
+
             body.innerHTML = `
                 <div class="detail-row">
                     <span class="detail-label">Job ID:</span>
@@ -447,7 +447,7 @@
                 ` : ''}
                 ${extraContent}
             `;
-            
+
             modal.classList.add('active');
         }
 
@@ -465,7 +465,7 @@
             const key = `${agent}-${queueType}`;
             const isExpanded = expandedQueues[key];
             const displayJobs = isExpanded ? jobs : jobs.slice(0, maxInitial);
-            
+
             let html = displayJobs.map(job => `
                 <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
                     <span>${getStatusIcon(job.status)}</span>
@@ -474,7 +474,7 @@
                     ${job.estimated_minutes ? `<span style="color: #666; font-size: 0.8em;">${formatDuration(job.estimated_minutes)}</span>` : ''}
                 </div>
             `).join('');
-            
+
             if (jobs.length > maxInitial) {
                 html += `
                     <div class="expand-link" onclick="event.stopPropagation(); toggleQueueExpansion('${agent}', '${queueType}')">
@@ -482,17 +482,17 @@
                     </div>
                 `;
             }
-            
+
             return html;
         }
 
         function calculateJobProgress(job) {
             if (!job.started_at || !job.estimated_minutes) return 0;
-            
+
             const startTime = new Date(job.started_at).getTime();
             const now = Date.now();
             const elapsed = (now - startTime) / 1000 / 60; // minutes
-            
+
             // Cap at 95% until actually done
             const progress = Math.min(95, (elapsed / job.estimated_minutes) * 100);
             return Math.round(progress);
@@ -502,14 +502,14 @@
             const key = `${agent}-inprogress`;
             const isExpanded = expandedQueues[key];
             const displayJobs = isExpanded ? jobs : jobs.slice(0, maxInitial);
-            
+
             let html = displayJobs.map(job => {
                 const progress = calculateJobProgress(job);
-                const elapsed = job.started_at ? 
+                const elapsed = job.started_at ?
                     Math.round((Date.now() - new Date(job.started_at).getTime()) / 1000 / 60) : 0;
                 const estimated = job.estimated_minutes || 30;
                 const remaining = Math.max(0, estimated - elapsed);
-                
+
                 return `
                     <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})' style="flex-wrap: wrap;">
                         <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
@@ -529,7 +529,7 @@
                     </div>
                 `;
             }).join('');
-            
+
             if (jobs.length > maxInitial) {
                 html += `
                     <div class="expand-link" onclick="event.stopPropagation(); toggleQueueExpansion('${agent}', 'inprogress')">
@@ -537,18 +537,16 @@
                     </div>
                 `;
             }
-            
+
             return html;
         }
 
         function renderMacEscalations(jobs) {
-            const escalations = jobs.filter(j => 
+            const escalations = jobs.filter(j =>
                 j.description.toLowerCase().includes('escalation') ||
                 j.description.toLowerCase().includes('exceeded') ||
                 j.description.includes('⚠️')
             );
-            
-            if (escalations.length === 0) return '';
             
             let html = `
                 <div class="agent-card-queue-title" style="color: #ff6b6b; font-weight: bold;">
@@ -556,32 +554,34 @@
                 </div>
             `;
             
-            html += escalations.slice(0, 3).map(job => `
-                <div class="agent-card-queue-item" style="border-left: 3px solid #ff6b6b; background: rgba(255, 107, 107, 0.1);"
-                     onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
-                    <span>🚨</span>
-                    <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
-                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ff6b6b;">
-                        ${job.description}
-                    </span>
-                </div>
-            `).join('');
-            
-            if (escalations.length > 3) {
-                html += `<div class="expand-link">... and ${escalations.length - 3} more escalations</div>`;
+            if (escalations.length === 0) {
+                html += `<div class="agent-card-empty" style="color: #666;">No escalations</div>`;
+            } else {
+                html += escalations.slice(0, 3).map(job => `
+                    <div class="agent-card-queue-item" style="border-left: 3px solid #ff6b6b; background: rgba(255, 107, 107, 0.1);"
+                         onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                        <span>🚨</span>
+                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ff6b6b;">
+                            ${job.description}
+                        </span>
+                    </div>
+                `).join('');
+                
+                if (escalations.length > 3) {
+                    html += `<div class="expand-link">... and ${escalations.length - 3} more escalations</div>`;
+                }
             }
             
             return html;
         }
 
         function renderMacRegularQueue(jobs) {
-            const regular = jobs.filter(j => 
+            const regular = jobs.filter(j =>
                 !j.description.toLowerCase().includes('escalation') &&
                 !j.description.toLowerCase().includes('exceeded') &&
                 !j.description.includes('⚠️')
             );
-            
-            if (regular.length === 0) return '';
             
             let html = `
                 <div class="agent-card-queue-title">
@@ -589,18 +589,22 @@
                 </div>
             `;
             
-            html += regular.slice(0, 5).map(job => `
-                <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
-                    <span>${getStatusIcon(job.status)}</span>
-                    <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
-                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        ${job.description}
-                    </span>
-                </div>
-            `).join('');
-            
-            if (regular.length > 5) {
-                html += `<div class="expand-link" onclick="event.stopPropagation();">... and ${regular.length - 5} more</div>`;
+            if (regular.length === 0) {
+                html += `<div class="agent-card-empty" style="color: #666;">No regular completions</div>`;
+            } else {
+                html += regular.slice(0, 5).map(job => `
+                    <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                        <span>${getStatusIcon(job.status)}</span>
+                        <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${job.description}
+                        </span>
+                    </div>
+                `).join('');
+                
+                if (regular.length > 5) {
+                    html += `<div class="expand-link" onclick="event.stopPropagation();">... and ${regular.length - 5} more</div>`;
+                }
             }
             
             return html;
@@ -608,19 +612,19 @@
 
         function renderAgentsOverview() {
             const container = document.getElementById('agents-overview');
-            
+
             const agentCards = AGENTS.map(agent => {
-                const agentJobs = allJobsData.filter(j => 
+                const agentJobs = allJobsData.filter(j =>
                     j.assigned_to.toLowerCase() === agent.toLowerCase()
                 );
-                
+
                 const pending = agentJobs.filter(j => j.status === 'TODO');
                 const inProgress = agentJobs.filter(j => j.status === 'IN_PROGRESS');
                 const completed = agentJobs.filter(j => j.status === 'DONE');
-                
+
                 const badgeClass = agent.toLowerCase();
                 const title = AGENT_TITLES[agent];
-                
+
                 return `
                     <div class="agent-card">
                         <div class="agent-card-header">
@@ -647,7 +651,7 @@
                                 ${renderInProgressJobs(inProgress, agent, 3)}
                             </div>
                         ` : ''}
-                        ${agent === 'Mac' && pending.length > 0 ? `
+                        ${agent === 'Mac' ? `
                             <div class="agent-card-queue">
                                 ${renderMacEscalations(pending)}
                             </div>
@@ -663,28 +667,28 @@
                     </div>
                 `;
             }).join('');
-            
+
             container.innerHTML = `<div class="agents-grid">${agentCards}</div>`;
         }
 
         function renderActiveAgents() {
             const container = document.getElementById('active-agents');
             const activeAgents = AGENTS.filter(agent => {
-                const agentJobs = allJobsData.filter(j => 
-                    j.assigned_to.toLowerCase() === agent.toLowerCase() && 
+                const agentJobs = allJobsData.filter(j =>
+                    j.assigned_to.toLowerCase() === agent.toLowerCase() &&
                     j.status === 'IN_PROGRESS'
                 );
                 return agentJobs.length > 0;
             });
-            
+
             if (activeAgents.length === 0) {
                 container.innerHTML = '<div style="color: #666; padding: 10px;">No agents currently active</div>';
                 return;
             }
-            
+
             container.innerHTML = activeAgents.map(agent => {
-                const agentJobs = allJobsData.filter(j => 
-                    j.assigned_to.toLowerCase() === agent.toLowerCase() && 
+                const agentJobs = allJobsData.filter(j =>
+                    j.assigned_to.toLowerCase() === agent.toLowerCase() &&
                     j.status === 'IN_PROGRESS'
                 );
                 const badgeClass = agent.toLowerCase();
@@ -702,7 +706,7 @@
         function renderAllJobs() {
             const container = document.getElementById('jobs-container');
             const mainJobs = allJobsData.filter(j => j.parent_id === null);
-            
+
             if (mainJobs.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px; color: #666;">
@@ -712,7 +716,7 @@
                 `;
                 return;
             }
-            
+
             // Simple list view for all jobs
             container.innerHTML = mainJobs
                 .sort((a, b) => b.id - a.id)
@@ -736,20 +740,20 @@
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
-                
+
                 allJobsData = data.jobs || [];
-                
+
                 document.getElementById('total-jobs').textContent = allJobsData.length;
-                document.getElementById('active-jobs').textContent = 
+                document.getElementById('active-jobs').textContent =
                     allJobsData.filter(j => j.status === 'IN_PROGRESS').length;
-                document.getElementById('completed-jobs').textContent = 
+                document.getElementById('completed-jobs').textContent =
                     allJobsData.filter(j => j.status === 'DONE').length;
-                
+
                 renderActiveAgents();
-                
+
                 if (currentView === 'all') renderAllJobs();
                 else renderAgentsOverview();
-                
+
                 document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
             } catch (error) {
                 console.error('Failed to load jobs:', error);
