@@ -689,16 +689,16 @@
                             Created: ${formatDate(job.created_at)} | Assigned to: ${job.assigned_to}
                         </div>
                     </div>
-                    <button onclick="confirmJob(${job.id}, true)" 
-                            style="padding: 10px 20px; background: #00d4ff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em;"
-                            title="Confirm and automatically dispatch to Sage">
-                        ✅ Confirm & Dispatch
+                    <button onclick="confirmJob(${job.id})" 
+                            style="padding: 10px 24px; background: #00d4ff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em;"
+                            title="Confirm this task to start work">
+                        ✅ Confirm
                     </button>
                 </div>
             `).join('');
         }
 
-        async function confirmJob(jobId, dispatch) {
+        async function confirmJob(jobId) {
             try {
                 const response = await fetch('/api/confirm', {
                     method: 'POST',
@@ -706,21 +706,20 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        job_id: jobId,
-                        dispatch: dispatch
+                        job_id: jobId
                     })
                 });
                 
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert(`✅ Job #${jobId} confirmed!${result.dispatch_result ? '\n' + result.dispatch_result : ''}`);
-                    loadJobs(); // Refresh the view
+                    // Silent success - just refresh
+                    loadJobs();
                 } else {
-                    alert('❌ Error: ' + (result.error || 'Unknown error'));
+                    console.error('Confirm failed:', result.error);
                 }
             } catch (error) {
-                alert('❌ Failed to confirm: ' + error.message);
+                console.error('Failed to confirm:', error);
             }
         }
 

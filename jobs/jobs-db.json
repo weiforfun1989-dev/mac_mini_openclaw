@@ -402,13 +402,13 @@
       "sub_job_sequence": null,
       "description": "Create a dashboard?",
       "status": "IN_PROGRESS",
-      "assigned_to": "Mac",
+      "assigned_to": "Sage",
       "created_at": "2026-02-23T01:17:45.036843",
       "completed_at": null,
       "sub_jobs": [
         16
       ],
-      "notes": "",
+      "notes": "Confirmed via dashboard",
       "estimated_minutes": 10,
       "started_at": null,
       "escalated": false,
@@ -417,11 +417,12 @@
       "last_heartbeat": null,
       "health_status": "healthy",
       "priority": "medium",
-      "dispatched_by": null,
+      "dispatched_by": "Mac",
       "research_result": null,
       "design_doc": null,
       "needs_confirmation": true,
-      "confirmed": false
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:18:03.431068"
     },
     {
       "id": 16,
@@ -456,13 +457,13 @@
       "sub_job_sequence": null,
       "description": "Build me an API endpoint",
       "status": "IN_PROGRESS",
-      "assigned_to": "Mac",
+      "assigned_to": "Sage",
       "created_at": "2026-02-23T01:17:45.038547",
       "completed_at": null,
       "sub_jobs": [
         18
       ],
-      "notes": "",
+      "notes": "Confirmed via dashboard",
       "estimated_minutes": 10,
       "started_at": null,
       "escalated": false,
@@ -471,11 +472,12 @@
       "last_heartbeat": null,
       "health_status": "healthy",
       "priority": "medium",
-      "dispatched_by": null,
+      "dispatched_by": "Mac",
       "research_result": null,
       "design_doc": null,
       "needs_confirmation": true,
-      "confirmed": false
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:18:06.852585"
     },
     {
       "id": 18,
@@ -510,13 +512,13 @@
       "sub_job_sequence": null,
       "description": "Research the best Python frameworks for async work",
       "status": "IN_PROGRESS",
-      "assigned_to": "Mac",
+      "assigned_to": "Sage",
       "created_at": "2026-02-23T01:17:45.039705",
       "completed_at": null,
       "sub_jobs": [
         20
       ],
-      "notes": "",
+      "notes": "Confirmed via dashboard",
       "estimated_minutes": 10,
       "started_at": null,
       "escalated": false,
@@ -525,11 +527,12 @@
       "last_heartbeat": null,
       "health_status": "healthy",
       "priority": "medium",
-      "dispatched_by": null,
+      "dispatched_by": "Mac",
       "research_result": null,
       "design_doc": null,
       "needs_confirmation": true,
-      "confirmed": false
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:18:09.229356"
     },
     {
       "id": 20,
