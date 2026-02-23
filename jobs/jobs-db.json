@@ -4163,7 +4163,19 @@
       "dispatched_by": null,
       "research_result": null,
       "design_doc": null
+    },
+    {
+      "id": 183,
+      "parent_id": null,
+      "description": "\u26a0\ufe0f ESCALATION: Glitch exceeded 2x estimate on job #180",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T23:02:08.153534",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "priority": "high"
     }
   ],
-  "lastJobId": 182
+  "lastJobId": 183
 }
