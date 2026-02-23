@@ -223,6 +223,7 @@ def main():
         print("  parallel <agent> [--complete]  Process jobs in parallel")
         print("  retry <job_id>                Retry a failed/stuck job")
         print("  notify <message> [level]       Send notification (info/warning/error/urgent)")
+        print("  auto [--daemon]               Auto-trigger agents and check for deadlocks")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
         print("\nAgent Worker:")
@@ -469,6 +470,14 @@ def main():
         from agent_worker import main as worker_main
         sys.argv = ["agent_worker", "notify"] + sys.argv[2:]
         worker_main()
+    
+    elif cmd == "auto":
+        # Auto-worker daemon or single check
+        from auto_worker import run_auto_worker, run_single_check
+        if len(sys.argv) > 2 and sys.argv[2] == "--daemon":
+            run_auto_worker()
+        else:
+            run_single_check()
     
     elif cmd == "workflow":
         # Delegate to workflow module
