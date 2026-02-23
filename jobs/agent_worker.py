@@ -54,6 +54,98 @@ AGENT_RESPONSES = {
     ]
 }
 
+def save_research_to_file(job_id, research_data):
+    """Save research results to a markdown file."""
+    from datetime import datetime
+    
+    filename = f"/Users/wxia/.openclaw/workspace/results/research/job-{job_id}-research.md"
+    
+    content = f"""# Research Results - Job #{job_id}
+
+**Query:** {research_data.get('query', 'N/A')}
+**Date:** {research_data.get('timestamp', datetime.now().isoformat())}
+
+## Summary
+{research_data.get('summary', 'No summary available')}
+
+## Sources
+"""
+    
+    sources = research_data.get('sources', [])
+    if sources:
+        for i, src in enumerate(sources, 1):
+            content += f"\n### {i}. {src.get('title', 'Untitled')}\n"
+            content += f"- URL: {src.get('url', 'N/A')}\n"
+            content += f"- Snippet: {src.get('snippet', 'N/A')[:200]}...\n"
+    else:
+        content += "\n_No sources found_\n"
+    
+    content += f"""
+## Raw Data
+```json
+{json.dumps(research_data, indent=2)}
+```
+"""
+    
+    with open(filename, 'w') as f:
+        f.write(content)
+    
+    return filename
+
+
+def save_design_to_file(job_id, design_doc):
+    """Save design document to a markdown file."""
+    from datetime import datetime
+    
+    filename = f"/Users/wxia/.openclaw/workspace/results/planning/job-{job_id}-design.md"
+    
+    content = f"""# Design Document - Job #{job_id}
+
+**Title:** {design_doc.get('title', 'N/A')}
+**Date:** {design_doc.get('timestamp', datetime.now().isoformat())}
+
+## Overview
+{design_doc.get('overview', 'N/A')}
+
+## Architecture
+{design_doc.get('architecture', 'N/A')}
+
+## Technology Stack
+{design_doc.get('tech_stack', 'N/A')}
+
+## Estimated Effort
+{design_doc.get('estimated_effort', 'N/A')}
+
+## Components
+"""
+    
+    components = design_doc.get('components', [])
+    if components:
+        for comp in components:
+            content += f"\n### {comp.get('name', 'Component')}\n"
+            content += f"{comp.get('description', 'No description')}\n"
+    else:
+        content += "\n_No components defined_\n"
+    
+    if design_doc.get('research_context'):
+        content += f"""
+## Research Context
+{design_doc['research_context']}
+"""
+    
+    content += f"""
+## Raw Data
+```json
+{json.dumps(design_doc, indent=2)}
+```
+"""
+    
+    with open(filename, 'w') as f:
+        f.write(content)
+    
+    return filename
+
+
 def perform_web_research(job_id, job_description, context=None):
     """
     Perform real web research for a job.
@@ -101,6 +193,10 @@ def perform_web_research(job_id, job_description, context=None):
     if job:
         job["research_result"] = research_data
         save_db(db)
+        
+        # Also save to file
+        filepath = save_research_to_file(job_id, research_data)
+        print(f"   📄 Research saved to: {filepath}")
     
     # Return summary for completion message
     if research_data["sources"]:
@@ -149,6 +245,10 @@ def create_design_doc(job_id, job_description, context=None):
     if job:
         job["design_doc"] = design_doc
         save_db(db)
+        
+        # Also save to file
+        filepath = save_design_to_file(job_id, design_doc)
+        print(f"   📄 Design doc saved to: {filepath}")
     
     return f"Design doc created: {design_doc['title']} - {design_doc['overview'][:80]}"
 
