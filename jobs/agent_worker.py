@@ -349,6 +349,14 @@ def claim_job(job_id, agent_name, estimated_minutes=None):
         print(f"⚠️  Job #{job_id} is assigned to {job['assigned_to']}, not {agent_name}")
         return False
     
+    # Check if agent is already at capacity (single-task mode)
+    agent_jobs = [j for j in db["jobs"] 
+                  if j["assigned_to"].lower() == agent_name.lower()]
+    in_progress_count = len([j for j in agent_jobs if j["status"] == "IN_PROGRESS"])
+    if in_progress_count >= 1:
+        print(f"⚠️  {agent_name} already has {in_progress_count} job(s) in progress. Single-task mode enforced.")
+        return False
+    
     # Calculate realistic estimated time if not provided
     if estimated_minutes is None:
         if job.get("estimated_minutes"):
