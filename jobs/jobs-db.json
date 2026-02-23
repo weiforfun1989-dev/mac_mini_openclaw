@@ -2092,7 +2092,13 @@
         171,
         172,
         173,
-        175
+        175,
+        183,
+        183,
+        183,
+        183,
+        183,
+        183
       ],
       "notes": "Research completed on 'Research microservices patterns' with industry best practices and standards",
       "estimated_minutes": 30,
@@ -3256,10 +3262,10 @@
       "id": 150,
       "parent_id": 106,
       "description": "\u2705 Planning complete for #106: Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:27:52.896020",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361255",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3278,10 +3284,10 @@
       "id": 151,
       "parent_id": 106,
       "description": "\u2705 Glitch complete for #106: Following the plan: Built frontend components and API integration",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:27:54.997956",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361263",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3300,10 +3306,10 @@
       "id": 152,
       "parent_id": 106,
       "description": "\u2705 Glitch complete for #106: Following the plan: Implemented core functionality with tests",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:27:57.103724",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361265",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3392,14 +3398,14 @@
       "id": 156,
       "parent_id": 106,
       "description": "Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:28:34.935303",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:46.875838",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T22:52:44.780935",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3408,7 +3414,31 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": {
+        "title": "Design: Planning task for: Research microservices patterns",
+        "timestamp": "2026-02-22T22:52:46.863793",
+        "overview": "Implementation plan for Planning task for: Research microservices patterns",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "claimed_at": "2026-02-22T22:52:44.780930",
+      "claimed_by": "Planning"
     },
     {
       "id": 157,
@@ -3438,10 +3468,10 @@
       "id": 158,
       "parent_id": 106,
       "description": "\u2705 Research complete for #106: Research completed on 'Research microservices patterns' with industry best practices and standards",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:28:37.081833",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361267",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3482,10 +3512,10 @@
       "id": 160,
       "parent_id": 106,
       "description": "\u2705 Glitch complete for #106: Following the plan: Refactored code and optimized performance",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:28:41.490497",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361268",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3526,10 +3556,10 @@
       "id": 162,
       "parent_id": 106,
       "description": "\u2705 Glitch complete for #106: Following the plan: Built frontend components and API integration",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:28:45.639304",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361270",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
@@ -3572,14 +3602,14 @@
       "id": 164,
       "parent_id": 106,
       "description": "Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:30:38.525809",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:49.036387",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T22:52:46.938721",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3588,7 +3618,31 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": {
+        "title": "Design: Planning task for: Research microservices patterns",
+        "timestamp": "2026-02-22T22:52:49.022222",
+        "overview": "Implementation plan for Planning task for: Research microservices patterns",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "claimed_at": "2026-02-22T22:52:46.938717",
+      "claimed_by": "Planning"
     },
     {
       "id": 165,
@@ -3619,14 +3673,14 @@
       "id": 166,
       "parent_id": 106,
       "description": "Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:30:38.538856",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:51.198325",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T22:52:49.100864",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3635,7 +3689,31 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": {
+        "title": "Design: Planning task for: Research microservices patterns",
+        "timestamp": "2026-02-22T22:52:51.183943",
+        "overview": "Implementation plan for Planning task for: Research microservices patterns",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "claimed_at": "2026-02-22T22:52:49.100859",
+      "claimed_by": "Planning"
     },
     {
       "id": 167,
@@ -3737,14 +3815,14 @@
       "id": 171,
       "parent_id": 106,
       "description": "Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:42:57.450415",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:53.361038",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T22:52:51.264286",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3753,20 +3831,44 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": {
+        "title": "Design: Planning task for: Research microservices patterns",
+        "timestamp": "2026-02-22T22:52:53.346990",
+        "overview": "Implementation plan for Planning task for: Research microservices patterns",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "claimed_at": "2026-02-22T22:52:51.264282",
+      "claimed_by": "Planning"
     },
     {
       "id": 172,
       "parent_id": 106,
       "description": "Glitch task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Glitch",
       "created_at": "2026-02-22T22:42:57.454504",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:53:11.040529",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Following the plan: Deployed to staging environment",
+      "estimated_minutes": 60,
+      "started_at": "2026-02-22T22:53:08.954200",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3775,20 +3877,22 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": null,
+      "claimed_at": "2026-02-22T22:53:08.954196",
+      "claimed_by": "Glitch"
     },
     {
       "id": 173,
       "parent_id": 106,
       "description": "Planning task for: Research microservices patterns",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:42:57.463521",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:55.519682",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Design doc created: Design: Planning task for: Research microservices patterns - Implementation plan for Planning task for: Research microservices patterns",
+      "estimated_minutes": 20,
+      "started_at": "2026-02-22T22:52:53.424327",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -3797,7 +3901,31 @@
       "priority": "medium",
       "dispatched_by": null,
       "research_result": null,
-      "design_doc": null
+      "design_doc": {
+        "title": "Design: Planning task for: Research microservices patterns",
+        "timestamp": "2026-02-22T22:52:55.508252",
+        "overview": "Implementation plan for Planning task for: Research microservices patterns",
+        "components": [
+          {
+            "name": "Core Module",
+            "description": "Main implementation logic"
+          },
+          {
+            "name": "Interface Layer",
+            "description": "API and user interaction"
+          },
+          {
+            "name": "Data Layer",
+            "description": "Storage and persistence"
+          }
+        ],
+        "architecture": "Modular design with clear separation of concerns",
+        "tech_stack": "Python-based with JSON storage",
+        "estimated_effort": "2-3 days",
+        "research_context": ""
+      },
+      "claimed_at": "2026-02-22T22:52:53.424323",
+      "claimed_by": "Planning"
     },
     {
       "id": 174,
@@ -3828,10 +3956,10 @@
       "id": 175,
       "parent_id": 106,
       "description": "\u2705 Glitch complete for #106: Following the plan: Built frontend components and API integration",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Mac",
       "created_at": "2026-02-22T22:42:59.571066",
-      "completed_at": null,
+      "completed_at": "2026-02-22T22:52:10.361271",
       "sub_jobs": [],
       "notes": "",
       "estimated_minutes": null,
