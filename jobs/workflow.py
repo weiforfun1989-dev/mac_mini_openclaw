@@ -86,14 +86,23 @@ def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=Fa
             break
         main_job_id = j["parent_id"]
 
-    # Create completion sub-job to Mac with prefix
+    # Create completion sub-job to Mac with detailed description
     prefix = AGENT_PREFIXES.get(agent_key.lower(), "")
     display_name = AGENT_DISPLAY_NAMES.get(agent_key.lower(), agent_name)
+    
     if needs_clarification:
         desc = f"⚠️ {prefix} {display_name} needs clarification on #{main_job_id}: {summary}"
     else:
-        desc = f"✅ {prefix} {display_name} complete for #{main_job_id}: {summary}"
-
+        # Detailed completion message
+        if agent_key.lower() == "research":
+            desc = f"✅ {prefix} Research complete #{main_job_id}: {summary}"
+        elif agent_key.lower() == "planning":
+            desc = f"✅ {prefix} Design complete #{main_job_id}: {summary}"
+        elif agent_key.lower() == "glitch":
+            desc = f"✅ {prefix} Code complete #{main_job_id}: {summary}"
+        else:
+            desc = f"✅ {prefix} {display_name} complete for #{main_job_id}: {summary}"
+    
     sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Mac")
 
     print(f"\n🔄 Workflow handoff complete:")
@@ -178,10 +187,21 @@ def route_to_next_agent(main_job_id, next_agent_key):
         print(f"   Run: jobs confirm {main_job_id}")
         return False
 
-    # Create sub-job for the next agent with prefix
+    # Create sub-job for the next agent with detailed description
     prefix = AGENT_PREFIXES.get(next_agent_key.lower(), "")
     display_name = AGENT_DISPLAY_NAMES.get(next_agent_key.lower(), agent_name)
-    desc = f"{prefix} {display_name} task for: {main_job['description'][:50]}"
+
+    # Create detailed description based on agent type
+    main_desc = main_job['description'][:40]
+    if next_agent_key.lower() == "research":
+        desc = f"{prefix} Research: '{main_desc}' - Search web sources, analyze findings, document results with URLs"
+    elif next_agent_key.lower() == "planning":
+        desc = f"{prefix} Design: '{main_desc}' - Create architecture, define components, write implementation plan"
+    elif next_agent_key.lower() == "glitch":
+        desc = f"{prefix} Implement: '{main_desc}' - Write code, add tests, commit to GitHub"
+    else:
+        desc = f"{prefix} {display_name} task for: {main_desc}"
+
     sub_id = create_job(desc, parent_id=main_job_id, assigned_to=agent_name)
 
     print(f"📤 Created sub-job #{sub_id} for {display_name}")
