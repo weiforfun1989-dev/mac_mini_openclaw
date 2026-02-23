@@ -675,7 +675,62 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 25,
+      "display_id": "25",
+      "parent_id": null,
+      "sub_job_sequence": null,
+      "description": "Document clear agent roles: Mac leader, Sage research, Atlas planning, Glitch coding with verification workflow",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T01:41:46.902400",
+      "completed_at": null,
+      "sub_jobs": [
+        26
+      ],
+      "notes": "Confirmed via dashboard",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": true,
+      "confirmed": true,
+      "confirmed_at": "2026-02-23T01:41:51.745800"
+    },
+    {
+      "id": 26,
+      "display_id": "25/1",
+      "parent_id": 25,
+      "sub_job_sequence": 1,
+      "description": "\ud83d\udcdd CONFIRMATION NEEDED: Please review and confirm job #25",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-23T01:41:46.903609",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "estimated_minutes": 10,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "high",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 24
+  "lastJobId": 26
 }
