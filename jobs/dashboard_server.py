@@ -105,6 +105,19 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
             job["confirmed"] = True
             job["confirmed_at"] = datetime.now().isoformat()
             job["notes"] = "Confirmed via dashboard, auto-dispatched"
+            
+            # Find and complete the confirmation sub-job
+            confirmation_subjob = None
+            for j in db["jobs"]:
+                if j.get("parent_id") == job_id and j["assigned_to"] == "Mac" and "CONFIRMATION NEEDED" in j["description"]:
+                    confirmation_subjob = j
+                    break
+            
+            if confirmation_subjob:
+                confirmation_subjob["status"] = "DONE"
+                confirmation_subjob["completed_at"] = datetime.now().isoformat()
+                confirmation_subjob["notes"] = "Confirmed via dashboard"
+            
             save_db(db)
             
             # Always auto-dispatch after confirmation
