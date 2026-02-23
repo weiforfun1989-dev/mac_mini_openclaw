@@ -228,6 +228,7 @@ def main():
         print("  retry <job_id>                Retry a failed/stuck job")
         print("  notify <message> [level]       Send notification (info/warning/error/urgent)")
         print("  auto [--daemon]               Auto-trigger agents and check for deadlocks")
+        print("  coordinator [--daemon]        Mac aggressively pushes all agents to closure")
         print("  workflow <cmd> [args]         Workflow automation commands")
         print("\nAgents: Mac, Glitch, Research, Planning")
         print("\nAgent Worker:")
@@ -482,6 +483,14 @@ def main():
             run_auto_worker()
         else:
             run_single_check()
+    
+    elif cmd == "coordinator":
+        # Mac auto-coordinator - aggressive workflow pusher
+        from coordinator import run_coordinator, run_single_push
+        if len(sys.argv) > 2 and sys.argv[2] == "--daemon":
+            run_coordinator()
+        else:
+            run_single_push()
     
     elif cmd == "workflow":
         # Delegate to workflow module
