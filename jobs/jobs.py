@@ -218,6 +218,8 @@ def main():
         print("  complete <id> [notes]         Mark job as complete")
         print("  list [status] [agent]         List jobs")
         print("  show <id>                     Show job details")
+        print("  research <job_id>             View research results")
+        print("  design <job_id>               View design document")
         print("  agent <name>                  Show agent's work queue view")
         print("  work <agent> [id] [--complete] Agent takes & works on job")
         print("  dispatch                      Mac auto-routes completed jobs")
@@ -303,6 +305,71 @@ def main():
             print("Usage: jobs show <id>")
             sys.exit(1)
         show_job(int(sys.argv[2]))
+
+    elif cmd == "research":
+        # View research results for a job
+        if len(sys.argv) < 3:
+            print("Usage: jobs research <job_id>")
+            print("\nShows research results including sources and summary")
+            sys.exit(1)
+        job_id = int(sys.argv[2])
+        db = load_db()
+        job = get_job(db, job_id)
+        if not job:
+            print(f"Job #{job_id} not found")
+            sys.exit(1)
+        
+        if not job.get("research_result"):
+            print(f"No research results for job #{job_id}")
+            sys.exit(0)
+        
+        rr = job["research_result"]
+        print(f"\n📚 RESEARCH RESULTS FOR JOB #{job_id}")
+        print("=" * 60)
+        print(f"Query: {rr.get('query', 'N/A')}")
+        print(f"Timestamp: {rr.get('timestamp', 'N/A')}")
+        if rr.get("summary"):
+            print(f"\nSummary:\n{rr['summary']}")
+        if rr.get("sources"):
+            print(f"\nSources ({len(rr['sources'])}):")
+            for i, src in enumerate(rr["sources"][:5], 1):
+                print(f"  {i}. {src.get('title', 'N/A')}")
+                print(f"     {src.get('url', 'N/A')}")
+        
+    elif cmd == "design":
+        # View design document for a job
+        if len(sys.argv) < 3:
+            print("Usage: jobs design <job_id>")
+            print("\nShows design document with architecture and components")
+            sys.exit(1)
+        job_id = int(sys.argv[2])
+        db = load_db()
+        job = get_job(db, job_id)
+        if not job:
+            print(f"Job #{job_id} not found")
+            sys.exit(1)
+        
+        if not job.get("design_doc"):
+            print(f"No design document for job #{job_id}")
+            sys.exit(0)
+        
+        dd = job["design_doc"]
+        print(f"\n📋 DESIGN DOCUMENT FOR JOB #{job_id}")
+        print("=" * 60)
+        print(f"Title: {dd.get('title', 'N/A')}")
+        print(f"Timestamp: {dd.get('timestamp', 'N/A')}")
+        print(f"\nOverview:\n{dd.get('overview', 'N/A')}")
+        print(f"\nArchitecture: {dd.get('architecture', 'N/A')}")
+        print(f"Tech Stack: {dd.get('tech_stack', 'N/A')}")
+        print(f"Estimated Effort: {dd.get('estimated_effort', 'N/A')}")
+        
+        if dd.get("components"):
+            print(f"\nComponents:")
+            for comp in dd["components"]:
+                print(f"  • {comp['name']}: {comp['description']}")
+        
+        if dd.get("research_context"):
+            print(f"\nResearch Context: {dd['research_context'][:100]}...")
     
     elif cmd == "agent":
         # Check if it's a subcommand for agent_worker
