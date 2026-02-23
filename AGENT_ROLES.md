@@ -13,8 +13,16 @@
 
 **Dispatch Decisions:**
 - Need research? → Dispatch to **Sage**
+- Already know requirements? → Dispatch directly to **Atlas** (skip research)
 - Have research, need planning? → Dispatch to **Atlas**
 - Have plan, need coding? → Dispatch to **Glitch**
+
+**Flexible Routing:**
+```
+Simple task:        User → Mac → Atlas → Glitch → DONE
+Research needed:    User → Mac → Sage → Atlas → Glitch → DONE
+Known requirements: User → Mac → Atlas → Glitch → DONE
+```
 
 ---
 
@@ -98,12 +106,19 @@
 ```
 User Request → Mac → Sage (Research) → File
                          ↓
+              OR Mac → Atlas (Planning) ← direct dispatch if known
+                         ↓
                     Atlas (Planning) → Design File
                          ↓
                     Glitch (Coding) → Git Commit
                          ↓
                     Mac (Verify vs Design) → DONE
 ```
+
+**Mac Dispatch Options:**
+1. **Research path:** Mac → Sage → Atlas → Glitch (for new/unclear topics)
+2. **Direct path:** Mac → Atlas → Glitch (when requirements are clear)
+3. **Code only:** Mac → Glitch (when design already exists)
 
 **Mac Verification Checklist:**
 - [ ] Glitch's commit implements all features from design doc?
