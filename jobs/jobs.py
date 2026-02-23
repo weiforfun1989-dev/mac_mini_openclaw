@@ -7,22 +7,33 @@ Handles job creation, sub-jobs, assignments, and status tracking.
 import json
 import os
 import sys
+import fcntl
 from datetime import datetime
 from pathlib import Path
 
 JOBS_DB = Path("/Users/wxia/.openclaw/workspace/jobs/jobs-db.json")
 
 def load_db():
-    """Load the jobs database."""
+    """Load the jobs database with file locking."""
     if JOBS_DB.exists():
-        with open(JOBS_DB) as f:
-            return json.load(f)
+        with open(JOBS_DB, 'r') as f:
+            # Acquire shared lock for reading
+            fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+            try:
+                return json.load(f)
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     return {"version": "1.0", "jobs": [], "lastJobId": 0}
 
 def save_db(db):
-    """Save the jobs database."""
+    """Save the jobs database with file locking."""
     with open(JOBS_DB, 'w') as f:
-        json.dump(db, f, indent=2)
+        # Acquire exclusive lock for writing
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            json.dump(db, f, indent=2)
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 def create_job(description, parent_id=None, assigned_to="Mac"):
     """Create a new job or sub-job."""

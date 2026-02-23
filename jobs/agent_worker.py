@@ -18,6 +18,10 @@ from workflow import create_job, AGENTS
 
 JOBS_DB = Path("/Users/wxia/.openclaw/workspace/jobs/jobs-db.json")
 
+# Thread lock for database operations (in addition to file locks)
+import threading
+db_lock = threading.Lock()
+
 # Simulated agent responses for auto-completion
 AGENT_RESPONSES = {
     "research": None,  # Research uses real web search instead
@@ -449,6 +453,7 @@ def process_parallel_jobs(agent_name, job_ids=None, auto_complete=False):
     """
     Process multiple jobs in parallel using threading.
     Each job runs in its own thread for concurrent execution.
+    Uses thread locking to prevent race conditions.
     """
     import threading
     
@@ -474,7 +479,11 @@ def process_parallel_jobs(agent_name, job_ids=None, auto_complete=False):
     def process_job(job):
         job_id = job["id"]
         print(f"   [Thread] Starting job #{job_id}")
-        result = simulate_agent_work(agent_name, job_id, auto_complete)
+        
+        # Use thread lock for database operations
+        with db_lock:
+            result = simulate_agent_work(agent_name, job_id, auto_complete)
+        
         results.append((job_id, result))
         print(f"   [Thread] Finished job #{job_id}")
     
