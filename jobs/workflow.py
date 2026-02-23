@@ -55,8 +55,9 @@ def dispatch_to_agent(job_id, agent_key):
 
 def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=False):
     """
-    Agent completes work and auto-creates a sub-job back to Mac.
-    This implements the workflow rule: agents always report back to Mac.
+    Agent completes work and workflow continues automatically.
+    Instead of creating notification sub-jobs, we auto-route to next agent.
+    Only creates Mac sub-job if clarification is needed.
     """
     agent_name = AGENTS.get(agent_key.lower(), agent_key)
     db = load_db()
@@ -86,31 +87,37 @@ def agent_complete_and_notify(agent_key, job_id, summary, needs_clarification=Fa
             break
         main_job_id = j["parent_id"]
 
-    # Create completion sub-job to Mac with detailed description
-    prefix = AGENT_PREFIXES.get(agent_key.lower(), "")
-    display_name = AGENT_DISPLAY_NAMES.get(agent_key.lower(), agent_name)
-    
+    agent_key_lower = agent_key.lower()
+    display_name = AGENT_DISPLAY_NAMES.get(agent_key_lower, agent_name)
+    prefix = AGENT_PREFIXES.get(agent_key_lower, "")
+
+    # If needs clarification, create Mac sub-job
     if needs_clarification:
         desc = f"⚠️ {prefix} {display_name} needs clarification on #{main_job_id}: {summary}"
-    else:
-        # Detailed completion message
-        if agent_key.lower() == "research":
-            desc = f"✅ {prefix} Research complete #{main_job_id}: {summary}"
-        elif agent_key.lower() == "planning":
-            desc = f"✅ {prefix} Design complete #{main_job_id}: {summary}"
-        elif agent_key.lower() == "glitch":
-            desc = f"✅ {prefix} Code complete #{main_job_id}: {summary}"
-        else:
-            desc = f"✅ {prefix} {display_name} complete for #{main_job_id}: {summary}"
-    
-    sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Mac")
+        sub_id = create_job(desc, parent_id=main_job_id, assigned_to="Mac")
+        print(f"\n🔄 Workflow paused:")
+        print(f"   • {display_name} needs clarification")
+        print(f"   • Created sub-job #{sub_id} for Mac review")
+        return sub_id
 
-    print(f"\n🔄 Workflow handoff complete:")
-    print(f"   • {display_name} finished job #{job_id}")
-    print(f"   • Auto-created sub-job #{sub_id} for Mac")
-    print(f"   • Mac will decide next steps")
+    # Auto-route to next agent based on who just completed
+    print(f"\n🔄 {display_name} completed job #{job_id}")
 
-    return sub_id
+    if agent_key_lower == "research":
+        # Auto-route to Atlas for planning
+        print(f"   Auto-routing to Atlas for planning...")
+        return dispatch_to_agent(main_job_id, "planning")
+    elif agent_key_lower == "planning":
+        # Auto-route to Glitch for coding
+        print(f"   Auto-routing to Glitch for implementation...")
+        return dispatch_to_agent(main_job_id, "coding")
+    elif agent_key_lower == "glitch":
+        # All done - workflow complete
+        print(f"   ✅ All work complete!")
+        print(f"   Mac can mark main job #{main_job_id} as DONE")
+        return main_job_id
+
+    return main_job_id
 
 def mac_evaluate_and_route(sub_job_id):
     """
