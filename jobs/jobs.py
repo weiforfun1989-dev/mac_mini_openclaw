@@ -89,7 +89,7 @@ def assign_job(job_id, agent):
         return False
     
     job["assigned_to"] = agent
-    job["status"] = "IN_PROGRESS"
+    # Status stays TODO - only becomes IN_PROGRESS when agent claims it
     save_db(db)
     print(f"Job #{job_id} assigned to {agent}")
     return True
