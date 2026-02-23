@@ -261,6 +261,73 @@ def get_agent_pending_jobs(agent_name, db=None):
             if j["assigned_to"].lower() == agent_lower 
             and j["status"] != "DONE"]
 
+def calculate_estimated_time(agent_name, description):
+    """Calculate realistic estimated time based on task type and complexity."""
+    desc_lower = description.lower()
+    word_count = len(description.split())
+    
+    # Base estimates by agent type
+    base_estimates = {
+        "research": 25,
+        "planning": 35,
+        "glitch": 45,
+        "mac": 10
+    }
+    
+    agent_key = agent_name.lower()
+    base = base_estimates.get(agent_key, 30)
+    
+    # Complexity multipliers based on keywords
+    complexity_factors = []
+    
+    if agent_key == "research":
+        # Research complexity
+        if any(k in desc_lower for k in ["architecture", "framework", "system", "platform"]):
+            complexity_factors.append(1.5)  # Complex research
+        if any(k in desc_lower for k in ["security", "performance", "scalability"]):
+            complexity_factors.append(1.3)  # Technical depth
+        if word_count > 15:
+            complexity_factors.append(1.2)  # Longer description = more scope
+            
+    elif agent_key == "planning":
+        # Planning complexity
+        if any(k in desc_lower for k in ["architecture", "system design", "infrastructure"]):
+            complexity_factors.append(1.6)  # Complex architecture
+        if any(k in desc_lower for k in ["database", "api", "microservices"]):
+            complexity_factors.append(1.4)  # Technical design
+        if word_count > 12:
+            complexity_factors.append(1.2)
+            
+    elif agent_key == "glitch":
+        # Coding complexity
+        if any(k in desc_lower for k in ["authentication", "payment", "security"]):
+            complexity_factors.append(1.7)  # Security-critical
+        if any(k in desc_lower for k in ["integration", "api", "database"]):
+            complexity_factors.append(1.4)  # Integration work
+        if any(k in desc_lower for k in ["frontend", "ui", "interface"]):
+            complexity_factors.append(1.2)  # UI work
+        if word_count > 10:
+            complexity_factors.append(1.15)
+    
+    # Calculate final estimate
+    multiplier = 1.0
+    for factor in complexity_factors:
+        multiplier *= factor
+    
+    # Cap multiplier to keep estimates reasonable
+    multiplier = min(multiplier, 2.5)
+    
+    estimate = int(base * multiplier)
+    
+    # Round to nearest 5 for cleaner numbers
+    estimate = round(estimate / 5) * 5
+    
+    # Min/Max bounds
+    estimate = max(10, min(estimate, 120))
+    
+    return estimate
+
+
 def claim_job(job_id, agent_name, estimated_minutes=None):
     """Agent claims a job to work on with time estimate. Returns True if successful."""
     db = load_db()
@@ -282,21 +349,13 @@ def claim_job(job_id, agent_name, estimated_minutes=None):
         print(f"⚠️  Job #{job_id} is assigned to {job['assigned_to']}, not {agent_name}")
         return False
     
-    # Only set estimated_minutes if not already set
+    # Calculate realistic estimated time if not provided
     if estimated_minutes is None:
-        # Check if job already has an estimate
         if job.get("estimated_minutes"):
             estimated_minutes = job["estimated_minutes"]
         else:
-            # Default estimates by agent type
-            default_estimates = {
-                "research": 30,
-                "planning": 20,
-                "glitch": 60,
-                "mac": 10
-            }
-            agent_key = agent_name.lower()
-            estimated_minutes = default_estimates.get(agent_key, 30)
+            # Use intelligent estimate based on task complexity
+            estimated_minutes = calculate_estimated_time(agent_name, job.get("description", ""))
     
     job["status"] = "IN_PROGRESS"
     job["claimed_at"] = datetime.now().isoformat()
