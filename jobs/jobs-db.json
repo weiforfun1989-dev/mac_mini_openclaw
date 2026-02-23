@@ -2054,10 +2054,10 @@
       "id": 106,
       "parent_id": null,
       "description": "Research microservices patterns",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "assigned_to": "Research",
       "created_at": "2026-02-22T22:20:19.581897",
-      "completed_at": "2026-02-22T22:28:37.078154",
+      "completed_at": "2026-02-22T22:53:11.144975",
       "sub_jobs": [
         107,
         109,
@@ -2100,7 +2100,7 @@
         183,
         183
       ],
-      "notes": "Research completed on 'Research microservices patterns' with industry best practices and standards",
+      "notes": "All sub-jobs completed",
       "estimated_minutes": 30,
       "started_at": "2026-02-22T22:20:19.636986",
       "escalated": false,
@@ -3879,7 +3879,8 @@
       "research_result": null,
       "design_doc": null,
       "claimed_at": "2026-02-22T22:53:08.954196",
-      "claimed_by": "Glitch"
+      "claimed_by": "Glitch",
+      "git_commit": "6f2e213"
     },
     {
       "id": 173,
@@ -3978,7 +3979,7 @@
       "id": 176,
       "parent_id": null,
       "description": "Research cloud architecture patterns",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "assigned_to": "Research",
       "created_at": "2026-02-22T22:46:13.921216",
       "completed_at": "2026-02-22T22:46:24.299659",
@@ -4031,7 +4032,7 @@
       "id": 178,
       "parent_id": null,
       "description": "Design cloud infrastructure",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:46:44.320820",
       "completed_at": "2026-02-22T22:46:46.476628",

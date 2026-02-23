@@ -205,17 +205,41 @@ def create_completion_subjob(parent_id, agent_name, summary):
     return sub_id
 
 def get_pending_for_agent(agent):
-    """Get all pending jobs for a specific agent, sorted by priority."""
+    """Get all pending jobs for a specific agent, sorted by priority.
+    For Mac, escalation jobs get highest priority."""
     db = load_db()
-    pending = [j for j in db["jobs"] if j["assigned_to"] == agent and j["status"] != "DONE"]
     
-    # Priority order: high > medium > low
-    priority_order = {"high": 3, "medium": 2, "low": 1}
-    
-    # Sort by priority (descending), then by creation time (ascending)
-    pending.sort(key=lambda j: (-priority_order.get(j.get("priority", "medium"), 2), j["created_at"]))
-    
-    return pending
+    if agent == "Mac":
+        # Mac has two queues: Escalations first, then regular completions
+        mac_jobs = [j for j in db["jobs"] 
+                    if j["assigned_to"] == agent 
+                    and j["status"] != "DONE"]
+        
+        # Separate escalation jobs from regular completions
+        escalations = [j for j in mac_jobs 
+                       if "escalation" in j.get("description", "").lower() 
+                       or "exceeded" in j.get("description", "").lower()
+                       or "⚠️" in j.get("description", "")]
+        regular = [j for j in mac_jobs if j not in escalations]
+        
+        # Sort escalations by creation time (oldest first)
+        escalations.sort(key=lambda x: x["created_at"])
+        regular.sort(key=lambda x: x["created_at"])
+        
+        # Return escalations first, then regular
+        return escalations + regular
+    else:
+        # Other agents: sort by priority
+        pending = [j for j in db["jobs"] 
+                   if j["assigned_to"] == agent and j["status"] != "DONE"]
+        
+        # Priority order: high > medium > low
+        priority_order = {"high": 3, "medium": 2, "low": 1}
+        
+        # Sort by priority (descending), then by creation time (ascending)
+        pending.sort(key=lambda j: (-priority_order.get(j.get("priority", "medium"), 2), j["created_at"]))
+        
+        return pending
 
 def main():
     if len(sys.argv) < 2:

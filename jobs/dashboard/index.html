@@ -535,6 +535,71 @@
             return html;
         }
 
+        function renderMacEscalations(jobs) {
+            const escalations = jobs.filter(j => 
+                j.description.toLowerCase().includes('escalation') ||
+                j.description.toLowerCase().includes('exceeded') ||
+                j.description.includes('⚠️')
+            );
+            
+            if (escalations.length === 0) return '';
+            
+            let html = `
+                <div class="agent-card-queue-title" style="color: #ff6b6b; font-weight: bold;">
+                    🚨 HIGH PRIORITY ESCALATIONS (${escalations.length})
+                </div>
+            `;
+            
+            html += escalations.slice(0, 3).map(job => `
+                <div class="agent-card-queue-item" style="border-left: 3px solid #ff6b6b; background: rgba(255, 107, 107, 0.1);"
+                     onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                    <span>🚨</span>
+                    <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ff6b6b;">
+                        ${job.description}
+                    </span>
+                </div>
+            `).join('');
+            
+            if (escalations.length > 3) {
+                html += `<div class="expand-link">... and ${escalations.length - 3} more escalations</div>`;
+            }
+            
+            return html;
+        }
+
+        function renderMacRegularQueue(jobs) {
+            const regular = jobs.filter(j => 
+                !j.description.toLowerCase().includes('escalation') &&
+                !j.description.toLowerCase().includes('exceeded') &&
+                !j.description.includes('⚠️')
+            );
+            
+            if (regular.length === 0) return '';
+            
+            let html = `
+                <div class="agent-card-queue-title">
+                    ⏳ Regular Completions (${regular.length})
+                </div>
+            `;
+            
+            html += regular.slice(0, 5).map(job => `
+                <div class="agent-card-queue-item" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})'>
+                    <span>${getStatusIcon(job.status)}</span>
+                    <span style="font-family: monospace; color: #888; font-size: 0.85em;">#${job.id}</span>
+                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${job.description}
+                    </span>
+                </div>
+            `).join('');
+            
+            if (regular.length > 5) {
+                html += `<div class="expand-link" onclick="event.stopPropagation();">... and ${regular.length - 5} more</div>`;
+            }
+            
+            return html;
+        }
+
         function renderAgentsOverview() {
             const container = document.getElementById('agents-overview');
             
@@ -575,12 +640,19 @@
                                 ${renderInProgressJobs(inProgress, agent, 3)}
                             </div>
                         ` : ''}
-                        ${pending.length > 0 ? `
+                        ${agent === 'Mac' && pending.length > 0 ? `
+                            <div class="agent-card-queue">
+                                ${renderMacEscalations(pending)}
+                            </div>
+                            <div class="agent-card-queue" style="margin-top: 15px;">
+                                ${renderMacRegularQueue(pending)}
+                            </div>
+                        ` : (pending.length > 0 ? `
                             <div class="agent-card-queue">
                                 <div class="agent-card-queue-title">⏳ Pending Queue (${pending.length})</div>
                                 ${renderAgentQueueItems(pending, agent, 'pending', 5)}
                             </div>
-                        ` : ''}
+                        ` : '')}
                     </div>
                 `;
             }).join('');
