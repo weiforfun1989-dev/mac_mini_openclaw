@@ -14,3 +14,5 @@ HEARTBEAT.md
 # Environment
 .env
 .env.local
+*.dmg
+voice-clone/venv/
