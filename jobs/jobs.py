@@ -85,12 +85,10 @@ def create_job(description, parent_id=None, assigned_to="Mac", priority="medium"
     
     # If this is a sub-job, add to parent's sub_jobs list atomically
     if parent_id:
-        db = load_db()  # Reload to get latest state
         parent = get_job(db, parent_id)
         if parent:
             parent["sub_jobs"].append(job_id)
             parent["status"] = "IN_PROGRESS"
-            save_db(db)
     
     save_db(db)
     
