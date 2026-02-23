@@ -13,6 +13,18 @@ from pathlib import Path
 
 JOBS_DB = Path("/Users/wxia/.openclaw/workspace/jobs/jobs-db.json")
 
+# Agent titles/names
+AGENT_TITLES = {
+    "Mac": "Mac 🖥️ (Leader)",
+    "Glitch": "Glitch ⚡ (Coder)",
+    "Research": "Research 🔍 (Analyst)",
+    "Planning": "Planning 📋 (Architect)"
+}
+
+def get_agent_title(agent_name):
+    """Get the full title for an agent."""
+    return AGENT_TITLES.get(agent_name, agent_name)
+
 def load_db():
     """Load the jobs database with file locking."""
     if JOBS_DB.exists():
@@ -497,7 +509,7 @@ def main():
             in_progress = [j for j in agent_jobs if j["status"] == "IN_PROGRESS"]
             
             print(f"\n{'='*60}")
-            print(f"👤 {agent_name.upper()} AGENT VIEW")
+            print(f"👤 {get_agent_title(agent_name).upper()}")
             print(f"{'='*60}")
             
             print(f"\n📊 STATS")
@@ -550,11 +562,11 @@ def main():
         agent = sys.argv[2]
         jobs = get_pending_for_agent(agent)
         if jobs:
-            print(f"\nPending jobs for {agent}:")
+            print(f"\nPending jobs for {get_agent_title(agent)}:")
             for job in jobs:
                 print(f"  #{job['id']}: {job['description'][:60]}")
         else:
-            print(f"No pending jobs for {agent}")
+            print(f"No pending jobs for {get_agent_title(agent)}")
     
     elif cmd == "dashboard":
         # Check if already running

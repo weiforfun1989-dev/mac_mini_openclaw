@@ -284,6 +284,12 @@
         let currentView = 'agents';
         let expandedQueues = {};
         const AGENTS = ['Mac', 'Glitch', 'Research', 'Planning'];
+        const AGENT_TITLES = {
+            'Mac': 'Mac 🖥️ (Leader)',
+            'Glitch': 'Glitch ⚡ (Coder)',
+            'Research': 'Research 🔍 (Analyst)',
+            'Planning': 'Planning 📋 (Architect)'
+        };
 
         function formatDate(isoString) {
             if (!isoString) return 'N/A';
@@ -613,11 +619,12 @@
                 const completed = agentJobs.filter(j => j.status === 'DONE');
                 
                 const badgeClass = agent.toLowerCase();
+                const title = AGENT_TITLES[agent];
                 
                 return `
                     <div class="agent-card">
                         <div class="agent-card-header">
-                            <div class="agent-card-name">👤 ${agent}</div>
+                            <div class="agent-card-name">👤 ${title}</div>
                             <span class="agent-card-badge ${badgeClass}">${agent}</span>
                         </div>
                         <div class="agent-card-stats">
@@ -681,10 +688,11 @@
                     j.status === 'IN_PROGRESS'
                 );
                 const badgeClass = agent.toLowerCase();
+                const title = AGENT_TITLES[agent];
                 return `
                     <div class="active-agent-badge ${badgeClass}">
                         <span class="indicator"></span>
-                        <span>🔨 ${agent}</span>
+                        <span>🔨 ${title}</span>
                         <span style="font-weight: bold;">${agentJobs.length}</span>
                     </div>
                 `;
