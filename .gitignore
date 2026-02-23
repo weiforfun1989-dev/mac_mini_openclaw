@@ -1,0 +1,16 @@
+# Personal files - do not track
+IDENTITY.md
+AGENTS.md
+USER.md
+BOOTSTRAP.md
+SOUL.md
+HEARTBEAT.md
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
+
+# Environment
+.env
+.env.local
