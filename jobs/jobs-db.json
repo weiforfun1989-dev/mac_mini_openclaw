@@ -4033,14 +4033,15 @@
       "id": 178,
       "parent_id": null,
       "description": "Design cloud infrastructure",
-      "status": "DONE",
+      "status": "IN_PROGRESS",
       "assigned_to": "Planning",
       "created_at": "2026-02-22T22:46:44.320820",
       "completed_at": "2026-02-22T22:46:46.476628",
       "sub_jobs": [
         179,
         196,
-        213
+        213,
+        222
       ],
       "notes": "Design doc created: Design: Design cloud infrastructure - Implementation plan for Design cloud infrastructure",
       "estimated_minutes": 20,
@@ -4891,7 +4892,8 @@
       "needs_confirmation": false,
       "confirmed": false,
       "claimed_at": "2026-02-22T23:41:51.109475",
-      "claimed_by": "Glitch"
+      "claimed_by": "Glitch",
+      "git_commit": "453a472"
     },
     {
       "id": 206,
@@ -5085,14 +5087,14 @@
       "parent_id": 178,
       "sub_job_sequence": 1,
       "description": "[Code] Glitch task for: Design cloud infrastructure",
-      "status": "TODO",
+      "status": "DONE",
       "assigned_to": "Glitch",
       "created_at": "2026-02-22T23:40:38.052082",
-      "completed_at": null,
+      "completed_at": "2026-02-22T23:41:55.370821",
       "sub_jobs": [],
-      "notes": "",
-      "estimated_minutes": null,
-      "started_at": null,
+      "notes": "Following the plan: Built frontend components and API integration",
+      "estimated_minutes": 60,
+      "started_at": "2026-02-22T23:41:53.283294",
       "escalated": false,
       "retry_count": 0,
       "max_retries": 3,
@@ -5103,7 +5105,9 @@
       "research_result": null,
       "design_doc": null,
       "needs_confirmation": false,
-      "confirmed": false
+      "confirmed": false,
+      "claimed_at": "2026-02-22T23:41:53.283284",
+      "claimed_by": "Glitch"
     },
     {
       "id": 214,
@@ -5312,7 +5316,33 @@
       "design_doc": null,
       "needs_confirmation": false,
       "confirmed": false
+    },
+    {
+      "id": 222,
+      "display_id": "178/2",
+      "parent_id": 178,
+      "sub_job_sequence": 2,
+      "description": "\u2705 [Code] Glitch complete for #178: Following the plan: Built frontend components and API integration",
+      "status": "TODO",
+      "assigned_to": "Mac",
+      "created_at": "2026-02-22T23:41:55.387524",
+      "completed_at": null,
+      "sub_jobs": [],
+      "notes": "",
+      "estimated_minutes": null,
+      "started_at": null,
+      "escalated": false,
+      "retry_count": 0,
+      "max_retries": 3,
+      "last_heartbeat": null,
+      "health_status": "healthy",
+      "priority": "medium",
+      "dispatched_by": null,
+      "research_result": null,
+      "design_doc": null,
+      "needs_confirmation": false,
+      "confirmed": false
     }
   ],
-  "lastJobId": 221
+  "lastJobId": 222
 }
